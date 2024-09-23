@@ -1,0 +1,100 @@
+1- appointment table: {
+    _id,
+    doctor_id,
+    patient_id,
+    date,
+    details,
+    createdAt	
+}
+
+add appointment: post: http://localhost:3000/addAppointment 
+delete appointment: delete: http://localhost:3000/appointment
+update appointment: no update.
+
+2- contacting table: {
+    _id,
+    name,
+    email,
+    phone,
+    subject,
+    message,
+    createdAt
+}
+
+add contact: post: http://localhost:3000/addContact
+delete contact: delete: http://localhost:3000/contact
+update contact: no update.
+
+3- doctor table: {
+    _id,
+    first_Name,
+    last_Name,
+    country,
+    role,
+    city,
+    avatar,
+    birthdate,
+    qualification,
+    experience,
+    specialization,
+    description,
+    phone,
+    email,
+    password,
+    createdAt	
+}
+add doctor: post: http://localhost:3000/admin
+delete doctor: delete: http://localhost:3000/doctors
+update doctor: put: http://localhost:3000/doctor
+
+4- medication table: {
+    _id,
+    doctor_id,
+    patient_id,
+    cash,
+    date,
+    status,
+    note,
+    description
+}
+
+add medication: post: http://localhost:3000/addMedication
+delete medication: no delete.
+update medication: http://localhost:3000/medication
+
+
+5- patient table: {
+    _id,
+    first_Name,
+    last_Name,
+    patient_id,
+    birthdate,
+    gender,
+    insurance,
+    email,
+    phone,
+    password,
+    chronic_diseases,
+    role,
+    createdAt
+}
+
+add patient: post: http://localhost:3000/
+
+
+
+"first_Name":"Ahmad",
+"last_Name":"Saleh",
+"country":"Palstine",
+"city":"Biddya",
+"is_Admin":"true",
+"avatar":"a.png",
+"birthdate": "9/26/2002",
+"qualification": "Aha1",
+"experience":"Aha2",
+"specialization":"Aha3",
+"description":"Desc",
+"phone":"0599999900",
+"email":"ahmad@gmail.com",
+"password":"123456789",
+
