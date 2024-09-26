@@ -7,8 +7,8 @@
     createdAt	
 }
 
-add appointment: post: http://localhost:3000/addAppointment 
-delete appointment: delete: http://localhost:3000/appointment
+add appointment: post: http://localhost:3000/add/addAppointment 
+delete appointment: delete: http://localhost:3000/delete/appointment
 update appointment: no update.
 
 2- contacting table: {
@@ -21,8 +21,8 @@ update appointment: no update.
     createdAt
 }
 
-add contact: post: http://localhost:3000/addContact
-delete contact: delete: http://localhost:3000/contact
+add contact: post: http://localhost:3000/add/addContact
+delete contact: delete: http://localhost:3000/delete/contact
 update contact: no update.
 
 3- doctor table: {
@@ -43,9 +43,9 @@ update contact: no update.
     password,
     createdAt	
 }
-add doctor: post: http://localhost:3000/admin
-delete doctor: delete: http://localhost:3000/doctors
-update doctor: put: http://localhost:3000/doctor
+add doctor: post: http://localhost:3000/add/admin
+delete doctor: delete: http://localhost:3000/update/doctors
+update doctor: put: http://localhost:3000/delete/doctor
 
 4- medication table: {
     _id,
@@ -58,9 +58,9 @@ update doctor: put: http://localhost:3000/doctor
     description
 }
 
-add medication: post: http://localhost:3000/addMedication
+add medication: post: http://localhost:3000/add/addMedication
 delete medication: no delete.
-update medication: http://localhost:3000/medication
+update medication: http://localhost:3000/update/medication
 
 
 5- patient table: {
@@ -79,7 +79,7 @@ update medication: http://localhost:3000/medication
     createdAt
 }
 
-add patient: post: http://localhost:3000/
+add patient: post: http://localhost:3000/auth/signup
 
 
 

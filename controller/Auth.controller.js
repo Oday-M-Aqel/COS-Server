@@ -18,12 +18,23 @@ module.exports.signUp = async (req, res) => {
       password,
       chronic_diseases,
     } = req.body;
-
+    console.log({
+      first_Name,
+      last_Name,
+      birthdate,
+      patient_id,
+      gender,
+      insurance,
+      email,
+      phone,
+      password,
+      chronic_diseases,
+    })
     const userFound = await Patient.findOne({ email });
     if (userFound) {
       return res.status(404).json({ message: "Email is already in use" });
     }
-    
+
     const dateOfBirth = birthdate.split('T')[0];
 
     const newPatient = new Patient({
@@ -82,16 +93,15 @@ module.exports.logIn = async (req, res) => {
     if (!isPasswordValid) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
-
     // Generate access and refresh tokens
     const accessToken = jwt.sign(
-      { id: foundUser._id, email: foundUser.email, roles: foundUser.roles },
+      { id: foundUser._id, email: foundUser.email, roles: foundUser.role },
       process.env.JWT_ACCESS_SECRET,
       { expiresIn: "1h" }
     );
 
     const refreshToken = jwt.sign(
-      { id: foundUser._id, email: foundUser.email, roles: foundUser.roles },
+      { id: foundUser._id, email: foundUser.email, roles: foundUser.role },
       process.env.JWT_REFRESH_SECRET,
       { expiresIn: "1d" }
     );
@@ -129,6 +139,7 @@ module.exports.refresh = async (req, res) => {
             process.env.JWT_ACCESS_SECRET,
             { expiresIn: "1h" }
           );
+          
           return res.status(200).json({
             message: "Token refreshed successfully",
             accessToken,

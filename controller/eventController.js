@@ -37,7 +37,7 @@ module.exports.addAppointment = async (req, res) => {
       patient_id,
       date: appDate,
       details,
-      createdAt: new Date(), 
+      createdAt: new Date(),
     });
     await newAppointment.save();
     res
@@ -50,9 +50,8 @@ module.exports.addAppointment = async (req, res) => {
 
 module.exports.addMedication = async (req, res) => {
   try {
-    const { doctor_id, patient_id, cash, date, status, note, description } = req.body;
-
-    
+    const { doctor_id, patient_id, cash, date, status, note, description } =
+      req.body;
 
     const newMedication = new Medication({
       doctor_id,
@@ -165,13 +164,110 @@ module.exports.updateMedication = async (req, res) => {
     const updatedMedication = await Medication.findByIdAndUpdate(id, data, {
       new: true,
     });
-    res
-      .status(200)
-      .json({
-        message: "Data updated successfully",
-        result: updatedMedication,
-      });
+    res.status(200).json({
+      message: "Data updated successfully",
+      result: updatedMedication,
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
+  }
+};
+
+/*
+Get Data:
+*/
+
+module.exports.getDoctors = async (req, res) => {
+  try {
+    const page = parseInt(req.params.page) || 1;
+    const limit = parseInt(req.params.limit) || 8;
+    const skip = (page - 1) * limit;
+    const doctors = await Doctor.find().skip(skip).limit(limit);
+
+    if (doctors && doctors.length > 0) {
+      return res.status(200).json(doctors);
+    } else {
+      console.log("Cannot Find");
+      return res.status(404).json({ message: "Doctors not found" });
+    }
+  } catch (err) {
+    console.log(err.message);
+    res.status(500).json({ message: "Internal server error: " + err.message });
+  }
+};
+
+module.exports.getAppointment = async (req, res) => {
+  try {
+    const page = parseInt(req.params.page) || 1;
+    const limit = parseInt(req.params.limit) || 6;
+    const skip = (page - 1) * limit;
+    const appointments = await Appointment.find().skip(skip).limit(limit);
+
+    if (appointments && appointments.length > 0) {
+      return res.status(200).json(appointments);
+    } else {
+      console.log("Cannot Find");
+      return res.status(404).json({ message: "Appointments not found" });
+    }
+  } catch (err) {
+    console.log(err.message);
+    res.status(500).json({ message: "Internal server error: " + err.message });
+  }
+};
+
+module.exports.getPatients = async (req, res) => {
+  try {
+    const page = parseInt(req.params.page) || 1;
+    const limit = parseInt(req.params.limit) || 4;
+    const skip = (page - 1) * limit;
+    const patients = await Patient.find().skip(skip).limit(limit);
+
+    if (patients && patients.length > 0) {
+      return res.status(200).json(patients);
+    } else {
+      console.log("Cannot Find");
+      return res.status(404).json({ message: "Patients not found" });
+    }
+  } catch (err) {
+    console.log(err.message);
+    res.status(500).json({ message: "Internal server error: " + err.message });
+  }
+};
+
+module.exports.searchDoctor = async (req, res) => {
+  try {
+    const { city, specialty } = req.body;
+    const found = await Doctor.findOne({
+      city: city,
+      specialization: specialty,
+    });
+
+    if (!found) {
+      console.log("Cannot Find");
+      return res.status(404).json({ message: "Doctor doesn't founded" });
+    }
+    res.status(200).json(found);
+  } catch (err) {
+    console.log(err.message);
+    res.status(500).json({ message: "Internal server error" + err.message });
+  }
+};
+
+module.exports.getContacts = async (req, res) => {
+  try {
+    const page = parseInt(req.params.page) || 1;
+    const limit = parseInt(req.params.limit) || 6;
+    const skip = (page - 1) * limit;
+    const contacts = await Contact.find().skip(skip).limit(limit);
+
+    if (contacts && contacts.length > 0) {
+      return res.status(200).json(contacts);
+    } else {
+      console.log("Cannot Find");
+      return res.status(404).json({ message: "Contacts not found" });
+    }
+  } catch (err) {
+    console.log(err.message);
+    res.status(500).json({ message: "Internal server error: " + err.message });
   }
 };
