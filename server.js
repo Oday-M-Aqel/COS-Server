@@ -22,14 +22,20 @@ const corsOptions = {
   credentials: true,
   optionsSuccessStatus: 204,
 };
-
-app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(cors(corsOptions));
 
+const PORT = process.env.PORT || 3000;
 // Connect to MongoDB using Mongoose
 mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log("Connected to MongoDB."))
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server running on port http://localhost:${PORT}`);
+    });
+    console.log("Connected to MongoDB."
+    )
+  })
   .catch(err => {
     console.error("Error connecting to MongoDB:", err.message);
   });
@@ -39,12 +45,11 @@ app.use("/auth", authRoutes); // Prefix routes with /auth
 app.use("/add", addRoutes);
 app.use("/delete", deleteRoutes);
 app.use("/update", updateRoutes);
-app.use(getRoutes);
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/get", getRoutes);
+
+app.use('/uploads/avatar', express.static(path.join(__dirname, 'uploads/avatar')));
 
 app.get("/", (req, res) => res.send("Hello World!"));
-
-const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
   console.log(`Server running on port http://localhost:${PORT}`);
