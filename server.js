@@ -30,7 +30,7 @@ const PORT = process.env.PORT || 3000;
 // Connect to MongoDB using Mongoose
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
-    app.listen(PORT, () => {
+    app.listen(PORT,'0.0.0.0', () => {
       console.log(`Server running on port http://localhost:${PORT}`);
     });
     console.log("Connected to MongoDB."
@@ -50,7 +50,3 @@ app.use("/get", getRoutes);
 app.use('/uploads/avatar', express.static(path.join(__dirname, 'uploads/avatar')));
 
 app.get("/", (req, res) => res.send("Hello World!"));
-
-app.listen(PORT, () => {
-  console.log(`Server running on port http://localhost:${PORT}`);
-});
