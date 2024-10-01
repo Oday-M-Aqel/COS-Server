@@ -109,7 +109,7 @@ module.exports.logIn = async (req, res) => {
     // Set the refresh token as a cookie
     res.cookie("cosToken", refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: true,
       maxAge: 24 * 60 * 60 * 1000,
     });
 

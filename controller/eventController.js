@@ -86,7 +86,7 @@ module.exports.deleteDoctorById = async (req, res) => {
 
 module.exports.deletePatientById = async (req, res) => {
   try {
-    const { id } = req.body;
+    const { id } = req.params;
     await Patient.findByIdAndDelete(id);
     res.status(200).json({ message: "Data deleted successfully" });
   } catch (err) {
@@ -94,9 +94,9 @@ module.exports.deletePatientById = async (req, res) => {
   }
 };
 
-module.exports.deleteAppointment = async (req, res) => {
+module.exports.deleteAppointmentById = async (req, res) => {
   try {
-    const { id } = req.body;
+    const { id } = req.params;
     await Appointment.findByIdAndDelete(id);
     res.status(200).json({ message: "Data deleted successfully" });
   } catch (err) {
@@ -104,9 +104,9 @@ module.exports.deleteAppointment = async (req, res) => {
   }
 };
 
-module.exports.deleteContact = async (req, res) => {
+module.exports.deleteContactById = async (req, res) => {
   try {
-    const { id } = req.body;
+    const { id } = req.params;
     await Contacting.findByIdAndDelete(id);
     res.status(200).json({ message: "Data deleted successfully" });
   } catch (err) {
@@ -269,5 +269,14 @@ module.exports.getContacts = async (req, res) => {
   } catch (err) {
     console.log(err.message);
     res.status(500).json({ message: "Internal server error: " + err.message });
+  }
+};
+
+module.exports.countDoctor = async (req, res) => {
+  try {
+    const doctorCount = await Doctor.countDocuments();
+    return res.status(200).json({ count: doctorCount });
+  } catch (err) {
+    return res.status(500).json({ message: "Internal server error: " + err.message });
   }
 };
