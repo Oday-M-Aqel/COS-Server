@@ -25,9 +25,9 @@ const doctorSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  is_Admin: {
-    type: Boolean,
-    default: false,
+  role: {
+    type: String,
+    default: "doctor",
   },
   birthdate: {
     type: Date,
