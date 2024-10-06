@@ -135,7 +135,7 @@ module.exports.refresh = async (req, res) => {
           return res.status(406).json({ message: "Unauthorized" });
         } else {
           const accessToken = sign(
-            { id: decoded.id, email: decoded.email, roles: decoded.roles },
+            { id: decoded.id, email: decoded.email, role: decoded.role },
             process.env.JWT_ACCESS_SECRET,
             { expiresIn: "1h" }
           );
@@ -144,7 +144,7 @@ module.exports.refresh = async (req, res) => {
             message: "Token refreshed successfully",
             accessToken,
             userData: decoded.id,
-            userRole: decoded.roles,
+            userRole: decoded.role,
           });
         }
       });

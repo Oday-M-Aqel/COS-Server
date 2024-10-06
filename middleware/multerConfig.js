@@ -26,7 +26,7 @@ const uploadUserAvatar = multer({
     fileFilter: (req, file, cb) => {
         const filetypes = /jpeg|jpg|png/;
         const mimetype = filetypes.test(file.mimetype);
-        const extname = filetypes.test(_extname(file.originalname).toLowerCase());
+        const extname = filetypes.test(extname(file.originalname).toLowerCase());
 
         if (mimetype && extname) {
             return cb(null, true);
