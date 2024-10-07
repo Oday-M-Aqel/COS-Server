@@ -110,6 +110,7 @@ module.exports.logIn = async (req, res) => {
     res.cookie("cosToken", refreshToken, {
       httpOnly: true,
       secure: true,
+      sameSite: "None",
       maxAge: 24 * 60 * 60 * 1000,
     });
 
@@ -160,6 +161,7 @@ module.exports.logOut = (req, res) => {
   res.cookie("cosToken", null, {
     httpOnly: true,
     secure: true,
+    sameSite: "None",
     maxAge: 1,
   });
   res.status(200).json({ message: "Logged out successfully" });
