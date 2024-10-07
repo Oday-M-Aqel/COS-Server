@@ -30,7 +30,7 @@
     "mongoose": "^8.3.4",
     "multer": "^1.4.5-lts.1",
     "mysql": "^2.18.1",
-    "nodemailer": "^6.9.13",
+    "nodemailer": "^6.9.15",
     "npx": "^10.2.2",
     "path": "^0.12.7",
     "uniqid": "^5.4.0",

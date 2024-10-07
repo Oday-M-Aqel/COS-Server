@@ -9,25 +9,6 @@ const uploadUserAvatar = require("../middleware/multerConfig");
 /*
     Insert Data
 */
-module.exports.addContact = async (req, res) => {
-  try {
-    const { name, email, phone, subject, message } = req.body;
-    const newContact = new Contacting({
-      name,
-      email,
-      phone,
-      subject,
-      message,
-      createdAt: new Date(), // Set to current UTC time
-    });
-    await newContact.save();
-    res
-      .status(200)
-      .json({ message: "Data inserted successfully", result: newContact });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
 
 module.exports.addAppointment = async (req, res) => {
   try {

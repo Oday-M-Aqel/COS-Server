@@ -85,13 +85,13 @@ module.exports.logIn = async (req, res) => {
     const foundUser = await UserModel.findOne({ email });
 
     if (!foundUser) {
-      return res.status(400).json({ message: "Invalid email or password" });
+      return res.status(200).json({ message: "Invalid email or password", success: false });
     }
 
     const isPasswordValid = await bcrypt.compare(password, foundUser.password);
 
     if (!isPasswordValid) {
-      return res.status(400).json({ message: "Invalid email or password" });
+      return res.status(200).json({ message: "Invalid email or password", success: false});
     }
     // Generate access and refresh tokens
     const accessToken = jwt.sign(
@@ -120,6 +120,7 @@ module.exports.logIn = async (req, res) => {
       accessToken,
       userData: foundUser._id,
       userRole: foundUser.role,
+      success: true
     });
   } catch (error) {
     console.error("Error during login:", error);

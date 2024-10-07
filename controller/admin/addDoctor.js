@@ -3,8 +3,6 @@ const Doctor = require('../../model/doctor'); // Adjust the path as necessary
 
 const createDoctor = async (req, res) => {
   uploadUserAvatar(req, res, async (err) => {
-    console.log(req.file.filename);
-    console.log(req.file);
     if (err) {
       return res.status(400).json({ message: "avatar errooor"});
     }
