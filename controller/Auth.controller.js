@@ -95,13 +95,13 @@ module.exports.logIn = async (req, res) => {
     }
     // Generate access and refresh tokens
     const accessToken = jwt.sign(
-      { id: foundUser._id, email: foundUser.email, roles: foundUser.role },
+      { id: foundUser._id, email: foundUser.email, role: foundUser.role },
       process.env.JWT_ACCESS_SECRET,
       { expiresIn: "1h" }
     );
 
     const refreshToken = jwt.sign(
-      { id: foundUser._id, email: foundUser.email, roles: foundUser.role },
+      { id: foundUser._id, email: foundUser.email, role: foundUser.role },
       process.env.JWT_REFRESH_SECRET,
       { expiresIn: "1d" }
     );
