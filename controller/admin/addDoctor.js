@@ -3,11 +3,14 @@ const Doctor = require('../../model/doctor'); // Adjust the path as necessary
 
 const createDoctor = async (req, res) => {
   uploadUserAvatar(req, res, async (err) => {
+    console.log(req.file.filename);
+    console.log(req.file);
     if (err) {
-      return res.status(400).json({ message: err.message });
+      return res.status(400).json({ message: "avatar errooor"});
     }
     
     try {
+      
       const {
         first_Name,
         last_Name,
@@ -26,14 +29,12 @@ const createDoctor = async (req, res) => {
         password,
       } = req.body;
 
-      const parsedBirthDate = new Date(birthdate);
-
       if (!isEmailStartsWithDr(email)) {
         return res.status(400).json({
           message: "Email is not valid; email for doctor must be like dr.doctorname@example.com",
         });
       }
-
+      
       const doctorData = new Doctor({
         first_Name,
         last_Name,
@@ -41,7 +42,7 @@ const createDoctor = async (req, res) => {
         city,
         avatar: req.file ? req.file.filename : null,
         role,
-        birthdate: parsedBirthDate,
+        birthdate,
         qualification,
         experience,
         specialization,
@@ -57,7 +58,7 @@ const createDoctor = async (req, res) => {
 
       res.status(201).json({ message: "Doctor created successfully" });
     } catch (err) {
-      res.status(500).json({ message: err.message });
+      res.status(500).json({ message: "Server Error" + err.message });
     }
   });
 };
