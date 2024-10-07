@@ -47,6 +47,6 @@ app.use("/delete", deleteRoutes);
 app.use("/update", updateRoutes);
 app.use("/get", getRoutes);
 
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads/avatar', express.static(path.join(__dirname, 'uploads/avatar')));
 
 app.get("/", (req, res) => res.send("Hello World!"));
