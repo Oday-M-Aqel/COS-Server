@@ -182,7 +182,9 @@ module.exports.getDoctors = async (req, res) => {
     const page = parseInt(req.params.page) || 1;
     const limit = parseInt(req.params.limit) || 8;
     const skip = (page - 1) * limit;
-    const doctors = await Doctor.find().skip(skip).limit(limit);
+    const doctors = await Doctor.find({ role: "doctor" })
+      .skip(skip)
+      .limit(limit);
 
     if (doctors && doctors.length > 0) {
       return res.status(200).json(doctors);
@@ -274,9 +276,11 @@ module.exports.getContacts = async (req, res) => {
 
 module.exports.countDoctor = async (req, res) => {
   try {
-    const doctorCount = await Doctor.countDocuments();
+    const doctorCount = await Doctor.countDocuments({ role: "doctor" });
     return res.status(200).json({ count: doctorCount });
   } catch (err) {
-    return res.status(500).json({ message: "Internal server error: " + err.message });
+    return res
+      .status(500)
+      .json({ message: "Internal server error: " + err.message });
   }
 };
