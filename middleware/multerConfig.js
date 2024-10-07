@@ -1,6 +1,6 @@
 const { diskStorage } = require('multer');
 const multer = require("multer");
-const { join } = require("path");
+const { join, extname } = require("path"); // Import extname
 const { existsSync, mkdirSync } = require('fs')
 
 const ensureDirExists = (dir) => {
@@ -26,9 +26,9 @@ const uploadUserAvatar = multer({
     fileFilter: (req, file, cb) => {
         const filetypes = /jpeg|jpg|png/;
         const mimetype = filetypes.test(file.mimetype);
-        const extname = filetypes.test(extname(file.originalname).toLowerCase());
+        const extnameValid = filetypes.test(extname(file.originalname).toLowerCase()); // Corrected extname usage
 
-        if (mimetype && extname) {
+        if (mimetype && extnameValid) {
             return cb(null, true);
         }
         cb(new Error('File upload only supports the following filetypes - ' + filetypes));
