@@ -14,7 +14,31 @@ module.exports.addAppointment = async (req, res) => {
   try {
     const { doctor_id, patient_id, details, appDate } = req.body;
 
-    const FoundDoctor = await Doctor.findOne({_id: doctor_id});
+    const FoundDoctor = await Doctor.findOne({ _id: doctor_id });
+    if (!FoundDoctor) {
+      return res.status(404).json({ message: "Doctor not found" });
+    }
+
+    const appointmentDate = new Date(appDate);
+
+    const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const appointmentDay = dayNames[appointmentDate.getDay()];
+    const appointmentTime = appointmentDate.getHours() * 60 + appointmentDate.getMinutes();
+
+    if (!FoundDoctor.workDays.includes(appointmentDay)) {
+      return res.status(400).json({ message: `Doctor is not available on ${appointmentDay}` });
+    }
+
+    const [startHour, startMinute] = FoundDoctor.StartTime.split(':').map(Number);
+    const [endHour, endMinute] = FoundDoctor.EndTime.split(':').map(Number);
+
+    const startTimeInMinutes = startHour * 60 + startMinute;
+    const endTimeInMinutes = endHour * 60 + endMinute;
+
+    if (appointmentTime < startTimeInMinutes || appointmentTime > endTimeInMinutes) {
+      return res.status(400).json({ message: `Appointment time is outside the doctor's working hours` });
+    }
+
     const newAppointment = new Appointment({
       doctor_id,
       patient_id,
@@ -22,11 +46,9 @@ module.exports.addAppointment = async (req, res) => {
       details,
       createdAt: new Date(),
     });
-  
+
     await newAppointment.save();
-    res
-      .status(200)
-      .json({ message: "Data inserted successfully", result: newAppointment });
+    res.status(200).json({ message: "Appointment created successfully", result: newAppointment });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
