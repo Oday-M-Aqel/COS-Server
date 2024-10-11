@@ -57,10 +57,14 @@ const doctorSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  workTime: {
-    type: String,
+  StartTime: {
+    type: Date,
     required: true,
-  },  
+  },
+  EndTime: {
+    type: Date,
+    required: true,
+  },
   createdAt: {
     type: Date,
     default: Date.now,

@@ -13,6 +13,8 @@ const uploadUserAvatar = require("../middleware/multerConfig");
 module.exports.addAppointment = async (req, res) => {
   try {
     const { doctor_id, patient_id, details, appDate } = req.body;
+    
+    
     const newAppointment = new Appointment({
       doctor_id,
       patient_id,
@@ -20,6 +22,7 @@ module.exports.addAppointment = async (req, res) => {
       details,
       createdAt: new Date(),
     });
+  
     await newAppointment.save();
     res
       .status(200)
