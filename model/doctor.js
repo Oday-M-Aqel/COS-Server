@@ -58,11 +58,17 @@ const doctorSchema = new mongoose.Schema({
     required: true,
   },
   StartTime: {
-    type: Date,
+    type: String,
     required: true,
+    match: /^([01]\d|2[0-3]):([0-5]\d)$/,
   },
   EndTime: {
-    type: Date,
+    type: String,
+    required: true,
+    match: /^([01]\d|2[0-3]):([0-5]\d)$/,
+  },
+  DaysWork: {
+    type: Array,
     required: true,
   },
   createdAt: {

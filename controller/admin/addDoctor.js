@@ -22,7 +22,9 @@ const createDoctor = async (req, res) => {
         description,
         phone,
         gender,
-        workTime,
+        StartTime,
+        EndTime,
+        DaysWork,
         email,
         password,
       } = req.body;
@@ -46,7 +48,9 @@ const createDoctor = async (req, res) => {
         specialization,
         description,
         gender,
-        workTime,
+        StartTime,
+        EndTime,
+        DaysWork,
         phone,
         email,
         password, // This will be hashed by the schema pre-save hook
