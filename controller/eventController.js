@@ -39,6 +39,15 @@ module.exports.addAppointment = async (req, res) => {
       return res.status(400).json({ message: `Appointment time is outside the doctor's working hours` });
     }
 
+    const existingAppointment = await Appointment.findOne({
+      doctor_id,
+      date: appDate,
+    });
+
+    if (existingAppointment) {
+      return res.status(400).json({ message: "There is already an appointment at the selected time" });
+    }
+
     const newAppointment = new Appointment({
       doctor_id,
       patient_id,
@@ -53,6 +62,7 @@ module.exports.addAppointment = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
 
 module.exports.addMedication = async (req, res) => {
   try {
