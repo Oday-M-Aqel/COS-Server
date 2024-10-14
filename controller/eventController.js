@@ -14,47 +14,37 @@ module.exports.addAppointment = async (req, res) => {
   try {
     const { doctor_id, patient_id, details, date, time } = req.body;
 
-    // Find the doctor by ID
     const FoundDoctor = await Doctor.findOne({ _id: doctor_id });
 
     if (!FoundDoctor) {
       return res.status(404).json({ message: "Doctor not found" });
     }
 
-    // Check if DaysWork is defined and valid
     if (!FoundDoctor.DaysWork || !Array.isArray(FoundDoctor.DaysWork)) {
       return res.status(500).json({ message: "Doctor's DaysWork is undefined or invalid" });
     }
 
-    // Convert the appointment date to a Date object
     const appointmentDate = new Date(date);
-
-    // Extract the day of the week from the appointment date
     const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     const appointmentDay = dayNames[appointmentDate.getDay()];
 
-    // Check if the doctor is working on the appointment day
     if (!FoundDoctor.DaysWork.includes(appointmentDay)) {
       return res.status(400).json({ message: `Doctor is not available on ${appointmentDay}` });
     }
 
-    // Convert the appointment time (HH:mm) into minutes for comparison
     const [appointmentHour, appointmentMinute] = time.split(':').map(Number);
     const appointmentTimeInMinutes = appointmentHour * 60 + appointmentMinute;
 
-    // Convert doctor's start and end times into minutes
     const [startHour, startMinute] = FoundDoctor.StartTime.split(':').map(Number);
     const [endHour, endMinute] = FoundDoctor.EndTime.split(':').map(Number);
     const startTimeInMinutes = startHour * 60 + startMinute;
     const endTimeInMinutes = endHour * 60 + endMinute;
 
-    // Check if the appointment time is within the doctor's working hours
     if (appointmentTimeInMinutes < startTimeInMinutes || appointmentTimeInMinutes > endTimeInMinutes) {
       return res.status(400).json({ message: `Appointment time is outside the doctor's working hours` });
     }
 
-    // Check for existing appointments within a 15-minute window
-    const fifteenMinutes = 15;
+    const fifteenMinutes = 14;
     const timeRangeStart = appointmentTimeInMinutes - fifteenMinutes;
     const timeRangeEnd = appointmentTimeInMinutes + fifteenMinutes;
 
@@ -63,14 +53,34 @@ module.exports.addAppointment = async (req, res) => {
       date,
       $expr: {
         $and: [
-          { $gte: [{ $toInt: { $substr: ["$time", 0, 2] } }, Math.floor(timeRangeStart / 60)] },
-          { $lte: [{ $toInt: { $substr: ["$time", 0, 2] } }, Math.floor(timeRangeEnd / 60)] }
+          {
+            $gte: [
+              {
+                $add: [
+                  { $multiply: [{ $toInt: { $substr: ["$time", 0, 2] } }, 60] },
+                  { $toInt: { $substr: ["$time", 3, 2] } }
+                ]
+              },
+              timeRangeStart
+            ]
+          },
+          {
+            $lte: [
+              {
+                $add: [
+                  { $multiply: [{ $toInt: { $substr: ["$time", 0, 2] } }, 60] },
+                  { $toInt: { $substr: ["$time", 3, 2] } }
+                ]
+              },
+              timeRangeEnd
+            ]
+          }
         ]
       }
     });
 
     if (existingAppointment) {
-      return res.status(400).json({ message: "There is already an appointment close to the selected time (within 15 minutes)" });
+      return res.status(400).json({ message: "There is already an appointment within 15 minutes of the selected time." });
     }
 
     const newAppointment = new Appointment({
@@ -332,10 +342,13 @@ module.exports.countDoctor = async (req, res) => {
 
 module.exports.getMedication = async (req, res) => {
   try {
-    const medications = await Medication.find();
+    const { doctor_id } = req.params;
+    const medications = await Medication.find({ doctor_id })
+      .populate('doctor_id', 'name')
+      .populate('patient_id', 'name');
 
     if (!medications || medications.length === 0) {
-      return res.status(404).json({ message: "No medications found" });
+      return res.status(404).json({ message: "No medications found for this doctor" });
     }
 
     res.status(200).json({ message: "Medications retrieved successfully", data: medications });
@@ -343,3 +356,4 @@ module.exports.getMedication = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
