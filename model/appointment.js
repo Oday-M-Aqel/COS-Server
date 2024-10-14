@@ -17,11 +17,21 @@ const appointment_Schema = new mongoose.Schema({
   },
   details: {
     type: String,
+    required: true,
   },
   createdAt: {
     type: Date,
     default: Date.now,
   },
+});
+
+appointment_Schema.pre("save", async function(next){
+  if (this.isNew) {
+    const currentUTC = new Date(this.createdAt || Date.now()); // Get UTC time
+    currentUTC.setHours(currentUTC.getHours() + 3);            // Adjust to +3 hours
+    this.createdAt = currentUTC;                               // Set adjusted time
+  }
+  next();
 });
 
 module.exports = appointment = mongoose.model(

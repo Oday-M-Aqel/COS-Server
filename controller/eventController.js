@@ -14,31 +14,51 @@ module.exports.addAppointment = async (req, res) => {
   try {
     const { doctor_id, patient_id, details, appDate } = req.body;
 
+    // Find the doctor by ID
     const FoundDoctor = await Doctor.findOne({ _id: doctor_id });
+
+    // Check if the doctor exists
     if (!FoundDoctor) {
       return res.status(404).json({ message: "Doctor not found" });
     }
 
+    // Check if DaysWork is defined
+    if (!FoundDoctor.DaysWork) {
+      return res.status(500).json({ message: "Doctor DaysWork field is undefined" });
+    }
+
+    // Check if DaysWork is an array
+    if (!Array.isArray(FoundDoctor.DaysWork)) {
+      return res.status(500).json({ message: "Doctor DaysWork is not an array" });
+    }
+
+    // Convert the appointment date to a Date object
     const appointmentDate = new Date(appDate);
-
+    
+    // Extract the day of the week from the appointment date
     const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-    const appointmentDay = dayNames[appointmentDate.getDay()];
-    const appointmentTime = appointmentDate.getHours() * 60 + appointmentDate.getMinutes();
+    const appointmentDay = dayNames[appointmentDate.getDay()];  // Get day name (e.g., "Mon")
 
-    if (!FoundDoctor.workDays.includes(appointmentDay)) {
+    // Check if the appointment day is a working day for the doctor
+    if (!FoundDoctor.DaysWork.includes(appointmentDay)) {
       return res.status(400).json({ message: `Doctor is not available on ${appointmentDay}` });
     }
 
+    // Extract time (hours and minutes) from appointmentDate
+    const appointmentTime = appointmentDate.getHours() * 60 + appointmentDate.getMinutes();
+
+    // Convert doctor's start and end times into minutes
     const [startHour, startMinute] = FoundDoctor.StartTime.split(':').map(Number);
     const [endHour, endMinute] = FoundDoctor.EndTime.split(':').map(Number);
-
     const startTimeInMinutes = startHour * 60 + startMinute;
     const endTimeInMinutes = endHour * 60 + endMinute;
 
+    // Check if the appointment time is within the doctor's working hours
     if (appointmentTime < startTimeInMinutes || appointmentTime > endTimeInMinutes) {
       return res.status(400).json({ message: `Appointment time is outside the doctor's working hours` });
     }
 
+    // Check if another appointment exists for the doctor at the same time
     const existingAppointment = await Appointment.findOne({
       doctor_id,
       date: appDate,
@@ -48,20 +68,22 @@ module.exports.addAppointment = async (req, res) => {
       return res.status(400).json({ message: "There is already an appointment at the selected time" });
     }
 
+    // Create and save the new appointment if everything is valid
     const newAppointment = new Appointment({
       doctor_id,
       patient_id,
       date: appDate,
       details,
-      createdAt: new Date(),
     });
 
     await newAppointment.save();
     res.status(200).json({ message: "Appointment created successfully", result: newAppointment });
+
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
+
 
 
 module.exports.addMedication = async (req, res) => {
