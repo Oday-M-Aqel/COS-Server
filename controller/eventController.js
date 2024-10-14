@@ -14,37 +14,46 @@ module.exports.addAppointment = async (req, res) => {
   try {
     const { doctor_id, patient_id, details, date, time } = req.body;
 
+    // Find the doctor by ID
     const FoundDoctor = await Doctor.findOne({ _id: doctor_id });
 
     if (!FoundDoctor) {
       return res.status(404).json({ message: "Doctor not found" });
     }
 
+    // Check if DaysWork is defined and valid
     if (!FoundDoctor.DaysWork || !Array.isArray(FoundDoctor.DaysWork)) {
       return res.status(500).json({ message: "Doctor's DaysWork is undefined or invalid" });
     }
 
+    // Convert the appointment date to a Date object
     const appointmentDate = new Date(date);
 
+    // Extract the day of the week from the appointment date
     const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     const appointmentDay = dayNames[appointmentDate.getDay()];
 
+    // Check if the doctor is working on the appointment day
     if (!FoundDoctor.DaysWork.includes(appointmentDay)) {
       return res.status(400).json({ message: `Doctor is not available on ${appointmentDay}` });
     }
 
+    // Convert the appointment time (HH:mm) into minutes for comparison
     const [appointmentHour, appointmentMinute] = time.split(':').map(Number);
     const appointmentTimeInMinutes = appointmentHour * 60 + appointmentMinute;
 
+    // Convert doctor's start and end times into minutes
     const [startHour, startMinute] = FoundDoctor.StartTime.split(':').map(Number);
     const [endHour, endMinute] = FoundDoctor.EndTime.split(':').map(Number);
     const startTimeInMinutes = startHour * 60 + startMinute;
     const endTimeInMinutes = endHour * 60 + endMinute;
 
+    // Check if the appointment time is within the doctor's working hours
     if (appointmentTimeInMinutes < startTimeInMinutes || appointmentTimeInMinutes > endTimeInMinutes) {
       return res.status(400).json({ message: `Appointment time is outside the doctor's working hours` });
     }
 
+    // Check for existing appointments within a 15-minute window
     const fifteenMinutes = 15;
     const timeRangeStart = appointmentTimeInMinutes - fifteenMinutes;
     const timeRangeEnd = appointmentTimeInMinutes + fifteenMinutes;
@@ -52,9 +61,11 @@ module.exports.addAppointment = async (req, res) => {
     const existingAppointment = await Appointment.findOne({
       doctor_id,
       date,
-      time: {
-        $gte: `${Math.floor(timeRangeStart / 60)}:${timeRangeStart % 60}`,
-        $lte: `${Math.floor(timeRangeEnd / 60)}:${timeRangeEnd % 60}`
+      $expr: {
+        $and: [
+          { $gte: [{ $toInt: { $substr: ["$time", 0, 2] } }, Math.floor(timeRangeStart / 60)] },
+          { $lte: [{ $toInt: { $substr: ["$time", 0, 2] } }, Math.floor(timeRangeEnd / 60)] }
+        ]
       }
     });
 
@@ -65,7 +76,7 @@ module.exports.addAppointment = async (req, res) => {
     const newAppointment = new Appointment({
       doctor_id,
       patient_id,
-      date,
+      date: appointmentDate,
       time,
       details,
     });
@@ -77,6 +88,7 @@ module.exports.addAppointment = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
 
 
 
