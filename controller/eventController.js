@@ -12,67 +12,61 @@ const uploadUserAvatar = require("../middleware/multerConfig");
 
 module.exports.addAppointment = async (req, res) => {
   try {
-    const { doctor_id, patient_id, details, appDate } = req.body;
+    const { doctor_id, patient_id, details, date, time } = req.body;
 
-    // Find the doctor by ID
     const FoundDoctor = await Doctor.findOne({ _id: doctor_id });
 
-    // Check if the doctor exists
     if (!FoundDoctor) {
       return res.status(404).json({ message: "Doctor not found" });
     }
 
-    // Check if DaysWork is defined
-    if (!FoundDoctor.DaysWork) {
-      return res.status(500).json({ message: "Doctor DaysWork field is undefined" });
+    if (!FoundDoctor.DaysWork || !Array.isArray(FoundDoctor.DaysWork)) {
+      return res.status(500).json({ message: "Doctor's DaysWork is undefined or invalid" });
     }
 
-    // Check if DaysWork is an array
-    if (!Array.isArray(FoundDoctor.DaysWork)) {
-      return res.status(500).json({ message: "Doctor DaysWork is not an array" });
-    }
+    const appointmentDate = new Date(date);
 
-    // Convert the appointment date to a Date object
-    const appointmentDate = new Date(appDate);
-    
-    // Extract the day of the week from the appointment date
     const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-    const appointmentDay = dayNames[appointmentDate.getDay()];  // Get day name (e.g., "Mon")
+    const appointmentDay = dayNames[appointmentDate.getDay()];
 
-    // Check if the appointment day is a working day for the doctor
     if (!FoundDoctor.DaysWork.includes(appointmentDay)) {
       return res.status(400).json({ message: `Doctor is not available on ${appointmentDay}` });
     }
 
-    // Extract time (hours and minutes) from appointmentDate
-    const appointmentTime = appointmentDate.getHours() * 60 + appointmentDate.getMinutes();
+    const [appointmentHour, appointmentMinute] = time.split(':').map(Number);
+    const appointmentTimeInMinutes = appointmentHour * 60 + appointmentMinute;
 
-    // Convert doctor's start and end times into minutes
     const [startHour, startMinute] = FoundDoctor.StartTime.split(':').map(Number);
     const [endHour, endMinute] = FoundDoctor.EndTime.split(':').map(Number);
     const startTimeInMinutes = startHour * 60 + startMinute;
     const endTimeInMinutes = endHour * 60 + endMinute;
 
-    // Check if the appointment time is within the doctor's working hours
-    if (appointmentTime < startTimeInMinutes || appointmentTime > endTimeInMinutes) {
+    if (appointmentTimeInMinutes < startTimeInMinutes || appointmentTimeInMinutes > endTimeInMinutes) {
       return res.status(400).json({ message: `Appointment time is outside the doctor's working hours` });
     }
 
-    // Check if another appointment exists for the doctor at the same time
+    const fifteenMinutes = 15;
+    const timeRangeStart = appointmentTimeInMinutes - fifteenMinutes;
+    const timeRangeEnd = appointmentTimeInMinutes + fifteenMinutes;
+
     const existingAppointment = await Appointment.findOne({
       doctor_id,
-      date: appDate,
+      date,
+      time: {
+        $gte: `${Math.floor(timeRangeStart / 60)}:${timeRangeStart % 60}`,
+        $lte: `${Math.floor(timeRangeEnd / 60)}:${timeRangeEnd % 60}`
+      }
     });
 
     if (existingAppointment) {
-      return res.status(400).json({ message: "There is already an appointment at the selected time" });
+      return res.status(400).json({ message: "There is already an appointment close to the selected time (within 15 minutes)" });
     }
 
-    // Create and save the new appointment if everything is valid
     const newAppointment = new Appointment({
       doctor_id,
       patient_id,
-      date: appDate,
+      date,
+      time,
       details,
     });
 
@@ -83,6 +77,7 @@ module.exports.addAppointment = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
 
 
 
@@ -320,5 +315,19 @@ module.exports.countDoctor = async (req, res) => {
     return res
       .status(500)
       .json({ message: "Internal server error: " + err.message });
+  }
+};
+
+module.exports.getMedication = async (req, res) => {
+  try {
+    const medications = await Medication.find();
+
+    if (!medications || medications.length === 0) {
+      return res.status(404).json({ message: "No medications found" });
+    }
+
+    res.status(200).json({ message: "Medications retrieved successfully", data: medications });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 };

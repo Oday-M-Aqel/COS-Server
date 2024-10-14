@@ -24,7 +24,7 @@ const medication_Schema = new mongoose.Schema({
     required: true,
   },
   note: {
-    type: String,
+    type: Array,
   },
   description: {
     type: String,
