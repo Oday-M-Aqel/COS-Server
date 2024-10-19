@@ -21,6 +21,7 @@ const medication_Schema = new mongoose.Schema({
   },
   status: {
     type: String,
+    enum: ['pending', 'approved', 'dispensed', 'in_progress', 'completed', 'canceled', 'expired'],
     required: true,
   },
   note: {

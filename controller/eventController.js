@@ -4,7 +4,7 @@ const Patient = require("../model/patient");
 const Contacting = require("../model/contacting");
 const Appointment = require("../model/appointment");
 const Medication = require("../model/medication");
-const uploadUserAvatar = require("../middleware/multerConfig");
+const { uploadUserAvatar } = require("../middleware/multerConfig");
 
 /*
     Insert Data
@@ -21,7 +21,9 @@ module.exports.addAppointment = async (req, res) => {
     }
 
     if (!FoundDoctor.DaysWork || !Array.isArray(FoundDoctor.DaysWork)) {
-      return res.status(500).json({ message: "Doctor's DaysWork is undefined or invalid" });
+      return res
+        .status(500)
+        .json({ message: "Doctor's DaysWork is undefined or invalid" });
     }
 
     const appointmentDate = new Date(date);
@@ -29,19 +31,29 @@ module.exports.addAppointment = async (req, res) => {
     const appointmentDay = dayNames[appointmentDate.getDay()];
 
     if (!FoundDoctor.DaysWork.includes(appointmentDay)) {
-      return res.status(400).json({ message: `Doctor is not available on ${appointmentDay}` });
+      return res
+        .status(400)
+        .json({ message: `Doctor is not available on ${appointmentDay}` });
     }
 
-    const [appointmentHour, appointmentMinute] = time.split(':').map(Number);
+    const [appointmentHour, appointmentMinute] = time.split(":").map(Number);
     const appointmentTimeInMinutes = appointmentHour * 60 + appointmentMinute;
 
-    const [startHour, startMinute] = FoundDoctor.StartTime.split(':').map(Number);
-    const [endHour, endMinute] = FoundDoctor.EndTime.split(':').map(Number);
+    const [startHour, startMinute] =
+      FoundDoctor.StartTime.split(":").map(Number);
+    const [endHour, endMinute] = FoundDoctor.EndTime.split(":").map(Number);
     const startTimeInMinutes = startHour * 60 + startMinute;
     const endTimeInMinutes = endHour * 60 + endMinute;
 
-    if (appointmentTimeInMinutes < startTimeInMinutes || appointmentTimeInMinutes > endTimeInMinutes) {
-      return res.status(400).json({ message: `Appointment time is outside the doctor's working hours` });
+    if (
+      appointmentTimeInMinutes < startTimeInMinutes ||
+      appointmentTimeInMinutes > endTimeInMinutes
+    ) {
+      return res
+        .status(400)
+        .json({
+          message: `Appointment time is outside the doctor's working hours`,
+        });
     }
 
     const fifteenMinutes = 14;
@@ -58,29 +70,34 @@ module.exports.addAppointment = async (req, res) => {
               {
                 $add: [
                   { $multiply: [{ $toInt: { $substr: ["$time", 0, 2] } }, 60] },
-                  { $toInt: { $substr: ["$time", 3, 2] } }
-                ]
+                  { $toInt: { $substr: ["$time", 3, 2] } },
+                ],
               },
-              timeRangeStart
-            ]
+              timeRangeStart,
+            ],
           },
           {
             $lte: [
               {
                 $add: [
                   { $multiply: [{ $toInt: { $substr: ["$time", 0, 2] } }, 60] },
-                  { $toInt: { $substr: ["$time", 3, 2] } }
-                ]
+                  { $toInt: { $substr: ["$time", 3, 2] } },
+                ],
               },
-              timeRangeEnd
-            ]
-          }
-        ]
-      }
+              timeRangeEnd,
+            ],
+          },
+        ],
+      },
     });
 
     if (existingAppointment) {
-      return res.status(400).json({ message: "There is already an appointment within 15 minutes of the selected time." });
+      return res
+        .status(400)
+        .json({
+          message:
+            "There is already an appointment within 15 minutes of the selected time.",
+        });
     }
 
     const newAppointment = new Appointment({
@@ -92,16 +109,16 @@ module.exports.addAppointment = async (req, res) => {
     });
 
     await newAppointment.save();
-    res.status(200).json({ message: "Appointment created successfully", result: newAppointment });
-
+    res
+      .status(200)
+      .json({
+        message: "Appointment created successfully",
+        result: newAppointment,
+      });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
-
-
-
-
 
 module.exports.addMedication = async (req, res) => {
   try {
@@ -201,13 +218,18 @@ module.exports.updateDoctorById = async (req, res) => {
 
 module.exports.updatePatientById = async (req, res) => {
   try {
-    const { id, data } = req.body;
-    const updatedPatient = await Patient.findByIdAndUpdate(id, data, {
+    const { id } = req.body;
+    let updateData = req.body;
+    
+    const updatedPatient = await Patient.findByIdAndUpdate(id, updateData, {
       new: true,
     });
-    res
-      .status(200)
-      .json({ message: "Data updated successfully", result: updatedPatient });
+
+    if (!updatedPatient) {
+      return res.status(404).json({ message: "Patient not found" });
+    }
+
+    res.status(200).json({ message: "Data updated successfully", result: updatedPatient });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -294,6 +316,7 @@ module.exports.getPatients = async (req, res) => {
 module.exports.searchDoctor = async (req, res) => {
   try {
     const { city, specialty } = req.body;
+    console.log(req.body);
     const found = await Doctor.findOne({
       city: city,
       specialization: specialty,
@@ -315,7 +338,7 @@ module.exports.getContacts = async (req, res) => {
     const page = parseInt(req.params.page) || 1;
     const limit = parseInt(req.params.limit) || 6;
     const skip = (page - 1) * limit;
-    const contacts = await Contact.find().skip(skip).limit(limit);
+    const contacts = await Contacting.find().skip(skip).limit(limit);
 
     if (contacts && contacts.length > 0) {
       return res.status(200).json(contacts);
@@ -343,17 +366,33 @@ module.exports.countDoctor = async (req, res) => {
 module.exports.getMedication = async (req, res) => {
   try {
     const { doctor_id } = req.params;
-    const medications = await Medication.find({ doctor_id })
-      .populate('doctor_id', 'name')
-      .populate('patient_id', 'name');
 
-    if (!medications || medications.length === 0) {
-      return res.status(404).json({ message: "No medications found for this doctor" });
+    // Check if the doctor exists before proceeding
+    const foundDoctor = await Doctor.findById(doctor_id);
+    if (!foundDoctor) {
+      return res.status(404).json({ message: "Doctor not found" });
     }
 
-    res.status(200).json({ message: "Medications retrieved successfully", data: medications });
+    // Retrieve medications for the specific doctor
+    const medications = await Medication.find({ doctor_id })
+      .populate("doctor_id", "name") // Populate the doctor name
+      .populate("patient_id", "name"); // Populate the patient name
+
+    // Check if medications are found
+    if (!medications || medications.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No medications found for this doctor" });
+    }
+
+    // Return the medications data
+    res
+      .status(200)
+      .json({
+        message: "Medications retrieved successfully",
+        data: medications,
+      });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
-
