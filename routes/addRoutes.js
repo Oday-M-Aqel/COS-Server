@@ -5,6 +5,7 @@ const {verifyToken} = require("../middleware/verifyToken");
 const createDoctor = require("../controller/admin/addDoctor");
 const add = require("../controller/eventController");
 const { addContact } = require("../controller/ContactingController");
+
 router.post("/admin", verifyAdmin, createDoctor);
 router.post("/addContact", addContact);
 router.post("/addAppointment", verifyToken, add.addAppointment);

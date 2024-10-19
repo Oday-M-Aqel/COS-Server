@@ -1,5 +1,5 @@
 const { uploadUserAvatar } = require("../../middleware/multerConfig");
-const Doctor = require('../../model/doctor'); // Adjust the path as necessary
+const Doctor = require('../../model/doctor');
 
 const createDoctor = async (req, res) => {
   uploadUserAvatar(req, res, async (err) => {
@@ -53,7 +53,7 @@ const createDoctor = async (req, res) => {
         DaysWork,
         phone,
         email,
-        password, // This will be hashed by the schema pre-save hook
+        password,
       });
 
       await doctorData.save();

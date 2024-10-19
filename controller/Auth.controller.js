@@ -46,7 +46,7 @@ module.exports.signUp = async (req, res) => {
       insurance,
       email,
       phone,
-      password, // Password will be hashed in the schema pre-save hook
+      password,
       chronic_diseases,
     });
 
@@ -55,11 +55,11 @@ module.exports.signUp = async (req, res) => {
         res.status(200).json({ message: "Patient saved successfully" });
       })
       .catch((error) => {
-        console.error('Error saving patient:', error); // Log the error
+        console.error('Error saving patient:', error);
         res.status(500).json({ message: "Error saving patient" });
       });
   } catch (error) {
-    console.error('Error during signup:', error); // Catch other errors
+    console.error('Error during signup:', error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -93,7 +93,7 @@ module.exports.logIn = async (req, res) => {
     if (!isPasswordValid) {
       return res.status(200).json({ message: "Invalid email or password", success: false});
     }
-    // Generate access and refresh tokens
+
     const accessToken = jwt.sign(
       { id: foundUser._id, email: foundUser.email, role: foundUser.role },
       process.env.JWT_ACCESS_SECRET,
@@ -105,8 +105,6 @@ module.exports.logIn = async (req, res) => {
       process.env.JWT_REFRESH_SECRET,
       { expiresIn: "1d" }
     );
-
-    // Set the refresh token as a cookie
     res.cookie("cosToken", refreshToken, {
       httpOnly: true,
       secure: true,
@@ -114,7 +112,6 @@ module.exports.logIn = async (req, res) => {
       maxAge: 24 * 60 * 60 * 1000,
     });
 
-    // Send the response
     res.status(200).json({
       message: "Login successful",
       accessToken,

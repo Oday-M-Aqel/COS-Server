@@ -4,8 +4,8 @@ const verifyAdmin = require("../middleware/verifyAdminToken");
 const { verifyToken } = require("../middleware/verifyToken");
 const update = require("../controller/eventController");
 
-router.put("/doctor", verifyToken, update.updateDoctorById);
+router.put("/doctor", verifyAdmin, update.updateDoctorById);
 router.put("/patient", verifyToken, update.updatePatientById);
-router.put("/medication", verifyToken, update.updateMedication);
+router.put("/medication", verifyAdmin, update.updateMedication);
 
 module.exports = router;

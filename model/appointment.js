@@ -31,9 +31,9 @@ const appointment_Schema = new mongoose.Schema({
 
 appointment_Schema.pre("save", async function(next){
   if (this.isNew) {
-    const currentUTC = new Date(this.createdAt || Date.now()); // Get UTC time
-    currentUTC.setHours(currentUTC.getHours() + 3);            // Adjust to +3 hours
-    this.createdAt = currentUTC;                               // Set adjusted time
+    const currentUTC = new Date(this.createdAt || Date.now()); 
+    currentUTC.setHours(currentUTC.getHours() + 3);            
+    this.createdAt = currentUTC;                               
   }
   next();
 });

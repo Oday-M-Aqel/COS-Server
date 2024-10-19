@@ -17,7 +17,7 @@ module.exports.addAppointment = async (req, res) => {
     const FoundDoctor = await Doctor.findOne({ _id: doctor_id });
 
     if (!FoundDoctor) {
-      return res.status(404).json({ message: "Doctor not found" });
+      return res.status(404).json({ message: "No data Found" });
     }
 
     if (!FoundDoctor.DaysWork || !Array.isArray(FoundDoctor.DaysWork)) {
@@ -148,7 +148,7 @@ delete data
 */
 module.exports.deleteDoctorById = async (req, res) => {
   try {
-    const { id } = req.params; // Getting id from URL params
+    const { id } = req.params;
     await Doctor.findByIdAndDelete(id);
     res.status(200).json({ message: "Doctor deleted successfully" });
   } catch (err) {
@@ -226,7 +226,7 @@ module.exports.updatePatientById = async (req, res) => {
     });
 
     if (!updatedPatient) {
-      return res.status(404).json({ message: "Patient not found" });
+      return res.status(404).json({ message: "No data Found" });
     }
 
     res.status(200).json({ message: "Data updated successfully", result: updatedPatient });
@@ -266,8 +266,7 @@ module.exports.getDoctors = async (req, res) => {
     if (doctors && doctors.length > 0) {
       return res.status(200).json(doctors);
     } else {
-      console.log("Cannot Find");
-      return res.status(404).json({ message: "Doctors not found" });
+      return res.status(404).json({ message: "No data Found" });
     }
   } catch (err) {
     console.log(err.message);
@@ -279,14 +278,14 @@ module.exports.getAppointment = async (req, res) => {
   try {
     const page = parseInt(req.params.page) || 1;
     const limit = parseInt(req.params.limit) || 6;
+    const d_id = req.params.id;
     const skip = (page - 1) * limit;
-    const appointments = await Appointment.find().skip(skip).limit(limit);
+    const appointments = await Appointment.find({doctor_id: d_id}).skip(skip).limit(limit);
 
     if (appointments && appointments.length > 0) {
       return res.status(200).json(appointments);
     } else {
-      console.log("Cannot Find");
-      return res.status(404).json({ message: "Appointments not found" });
+      return res.status(404).json({ message: "No data Found" });
     }
   } catch (err) {
     console.log(err.message);
@@ -304,8 +303,7 @@ module.exports.getPatients = async (req, res) => {
     if (patients && patients.length > 0) {
       return res.status(200).json(patients);
     } else {
-      console.log("Cannot Find");
-      return res.status(404).json({ message: "Patients not found" });
+      return res.status(404).json({ message: "No data Found" });
     }
   } catch (err) {
     console.log(err.message);
@@ -323,8 +321,7 @@ module.exports.searchDoctor = async (req, res) => {
     });
 
     if (!found) {
-      console.log("Cannot Find");
-      return res.status(404).json({ message: "Doctor doesn't founded" });
+      return res.status(404).json({ message: "No data Found" });
     }
     res.status(200).json(found);
   } catch (err) {
@@ -343,14 +340,56 @@ module.exports.getContacts = async (req, res) => {
     if (contacts && contacts.length > 0) {
       return res.status(200).json(contacts);
     } else {
-      console.log("Cannot Find");
-      return res.status(404).json({ message: "Contacts not found" });
+      return res.status(404).json({ message: "No data Found" });
     }
   } catch (err) {
     console.log(err.message);
     res.status(500).json({ message: "Internal server error: " + err.message });
   }
 };
+
+module.exports.getMedication = async (req, res) => {
+  try {
+    const { doctor_id } = req.params.doctor_id;
+
+    const foundDoctor = await Doctor.findById(doctor_id);
+    if (!foundDoctor) {
+      return res.status(404).json({ message: "No data Found" });
+    }
+
+    const page = parseInt(req.params.page) || 1;
+    const limit = parseInt(req.params.limit) || 6;
+    const skip = (page - 1) * limit;
+
+    const medications = await Medication.find({ doctor_id })
+      .populate("doctor_id", "name")
+      .populate("patient_id", "name")
+      .sort({ date: 1 })
+      .skip(skip)
+      .limit(limit);
+
+    if (!medications || medications.length === 0) {
+      return res.status(404).json({ message: "No medications found for this doctor" });
+    }
+
+    const totalMedications = await Medication.countDocuments({ doctor_id });
+    const totalPages = Math.ceil(totalMedications / limit);
+
+    res.status(200).json({
+      message: "Medications retrieved successfully",
+      data: medications,
+      pagination: {
+        totalRecords: totalMedications,
+        totalPages: totalPages,
+        currentPage: page,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// Count Functions:
 
 module.exports.countDoctor = async (req, res) => {
   try {
@@ -363,33 +402,52 @@ module.exports.countDoctor = async (req, res) => {
   }
 };
 
-module.exports.getMedication = async (req, res) => {
+module.exports.countAppointments = async (req, res) => {
+  try {
+    const appointmentCount = await Appointment.countDocuments();
+    if (appointmentCount === 0) {
+      return res.status(404).json({ message: "No data Found" });
+    }
+    return res.status(200).json({ count: appointmentCount });
+  } catch (err) {
+    return res.status(500).json({ message: "Internal server error: " + err.message });
+  }
+};
+
+module.exports.countPatients = async (req, res) => {
+  try {
+    const patientCount = await Patient.countDocuments();
+    if (patientCount === 0) {
+      return res.status(404).json({ message: "No data Found" });
+    }
+    return res.status(200).json({ count: patientCount });
+  } catch (err) {
+    return res.status(500).json({ message: "Internal server error: " + err.message });
+  }
+};
+
+module.exports.countMedications = async (req, res) => {
+  try {
+    const medicationCount = await Medication.countDocuments();
+    if (medicationCount === 0) {
+      return res.status(404).json({ message: "No data Found" });
+    }
+    return res.status(200).json({ count: medicationCount });
+  } catch (err) {
+    return res.status(500).json({ message: "Internal server error: " + err.message });
+  }
+};
+
+module.exports.countAppForDoctors = async (req, res) => {
   try {
     const { doctor_id } = req.params;
-
-    const foundDoctor = await Doctor.findById(doctor_id);
-    if (!foundDoctor) {
-      return res.status(404).json({ message: "Doctor not found" });
+    const appointmentCount = await Appointment.countDocuments({ doctor_id });
+    if (appointmentCount === 0) {
+      return res.status(404).json({ message: "No appointments found for this doctor" });
     }
-
-    const medications = await Medication.find({ doctor_id })
-      .populate("doctor_id", "name")
-      .populate("patient_id", "name");
-
-    if (!medications || medications.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "No medications found for this doctor" });
-    }
-
-    res
-      .status(200)
-      .json({
-        message: "Medications retrieved successfully",
-        data: medications,
-      });
+    return res.status(200).json({ count: appointmentCount });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    return res.status(500).json({ message: "Internal server error: " + err.message });
   }
 };
 

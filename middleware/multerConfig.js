@@ -1,6 +1,6 @@
 const { diskStorage } = require('multer');
 const multer = require("multer");
-const { join, extname } = require("path"); // Import extname
+const { join, extname } = require("path");
 const { existsSync, mkdirSync } = require('fs')
 
 const ensureDirExists = (dir) => {
@@ -22,11 +22,11 @@ const storage1 = diskStorage({
 
 const uploadUserAvatar = multer({
     storage: storage1,
-    limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB limit
+    limits: { fileSize: 5 * 1024 * 1024 },
     fileFilter: (req, file, cb) => {
         const filetypes = /jpeg|jpg|png/;
         const mimetype = filetypes.test(file.mimetype);
-        const extnameValid = filetypes.test(extname(file.originalname).toLowerCase()); // Corrected extname usage
+        const extnameValid = filetypes.test(extname(file.originalname).toLowerCase());
         if (mimetype && extnameValid) {
             return cb(null, true);
         }

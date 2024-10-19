@@ -57,7 +57,6 @@ const patient_Schema = new mongoose.Schema({
 });
 
 patient_Schema.pre("save", async function (next) {
-  // Hash password if it has been modified
   if (this.isModified("password")) {
     try {
       const salt = await bcrypt.genSalt(10);
@@ -68,11 +67,10 @@ patient_Schema.pre("save", async function (next) {
     }
   }
 
-  // Adjust createdAt to your local timezone (+3) only when document is newly created
     if (this.isNew) {
-      const currentUTC = new Date(this.createdAt || Date.now()); // Get UTC time
-      currentUTC.setHours(currentUTC.getHours() + 3);            // Adjust to +3 hours
-      this.createdAt = currentUTC;                               // Set adjusted time
+      const currentUTC = new Date(this.createdAt || Date.now()); 
+      currentUTC.setHours(currentUTC.getHours() + 3);            
+      this.createdAt = currentUTC;                               
     }
 
     next();

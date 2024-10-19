@@ -77,7 +77,6 @@ const doctorSchema = new mongoose.Schema({
   },
 });
 
-// Pre-save hook for password hashing
 doctorSchema.pre("save", async function (next) {
   if (this.isModified("password")) {
     try {
@@ -93,26 +92,3 @@ doctorSchema.pre("save", async function (next) {
 });
 
 module.exports = mongoose.model("doctor", doctorSchema);
-
-
-/*
-
-{"_id":{"$oid":"66f5897c2ac9f3ccb7172114"},
-"first_Name":"Ahmad",
-"last_Name":"Saleh",
-"country":"Palstine",
-"city":"Biddya",
-"avatar":null,
-"is_Admin":true,
-"birthdate":{"$date":{"$numberLong":"1032987600000"}},
-"qualification":"Aha1",
-"experience":"Aha2",
-"specialization":"Aha3",
-"description":"Desc",
-"phone":"0599999900",
-"email":"dr.ahmad@gmail.com",
-"password":"$2b$10$3tiaZ/JnLTLEwDNQ2HGsK.xiM2mw/JwN2dpT2RhrVZZK0qC73rz/m",
-"createdAt":{"$date":{"$numberLong":"1727367548637"}},
-"__v":{"$numberInt":"0"}}
-
-*/
