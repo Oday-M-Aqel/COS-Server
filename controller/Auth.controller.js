@@ -141,8 +141,11 @@ module.exports.refresh = async (req, res) => {
             process.env.JWT_ACCESS_SECRET,
             { expiresIn: "1h" }
           );
-          const id = decoded.id;
-          const foundUser = await UserModel.findOne({id})
+          const email1 = decoded.email;
+          const isDoctor = isEmailStartsWithDr(email1);
+          const UserModel = isDoctor ? Doctor : Patient;
+      
+          const foundUser = await UserModel.findOne({ email1 });
           return res.status(200).json({
             message: "Token refreshed successfully",
             accessToken,
