@@ -118,7 +118,7 @@ module.exports.logIn = async (req, res) => {
     res.status(200).json({
       message: "Login successful",
       accessToken,
-      userData: foundUser._id,
+      userData: foundUser,
       userRole: foundUser.role,
       success: true
     });
@@ -132,7 +132,7 @@ module.exports.refresh = async (req, res) => {
   try {
     const refreshToken = req.cookies.cosToken;
     if (refreshToken) {
-      verify(refreshToken, process.env.JWT_REFRESH_SECRET, (err, decoded) => {
+      verify(refreshToken, process.env.JWT_REFRESH_SECRET, async (err, decoded) => {
         if (err) {
           return res.status(406).json({ message: "Unauthorized" });
         } else {
@@ -141,11 +141,12 @@ module.exports.refresh = async (req, res) => {
             process.env.JWT_ACCESS_SECRET,
             { expiresIn: "1h" }
           );
-          
+          const id = decoded.id;
+          const foundUser = await UserModel.findOne({id})
           return res.status(200).json({
             message: "Token refreshed successfully",
             accessToken,
-            userData: decoded.id,
+            userData: foundUser,
             userRole: decoded.role,
           });
         }

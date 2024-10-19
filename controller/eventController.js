@@ -367,25 +367,21 @@ module.exports.getMedication = async (req, res) => {
   try {
     const { doctor_id } = req.params;
 
-    // Check if the doctor exists before proceeding
     const foundDoctor = await Doctor.findById(doctor_id);
     if (!foundDoctor) {
       return res.status(404).json({ message: "Doctor not found" });
     }
 
-    // Retrieve medications for the specific doctor
     const medications = await Medication.find({ doctor_id })
-      .populate("doctor_id", "name") // Populate the doctor name
-      .populate("patient_id", "name"); // Populate the patient name
+      .populate("doctor_id", "name")
+      .populate("patient_id", "name");
 
-    // Check if medications are found
     if (!medications || medications.length === 0) {
       return res
         .status(404)
         .json({ message: "No medications found for this doctor" });
     }
 
-    // Return the medications data
     res
       .status(200)
       .json({
@@ -396,3 +392,4 @@ module.exports.getMedication = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
