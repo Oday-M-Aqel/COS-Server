@@ -145,7 +145,7 @@ module.exports.refresh = async (req, res) => {
           const isDoctor = isEmailStartsWithDr(email1);
           const UserModel = isDoctor ? Doctor : Patient;
       
-          const foundUser = await UserModel.findOne({ email1 });
+          const foundUser = await UserModel.findOne({ email: email1 });
           return res.status(200).json({
             message: "Token refreshed successfully",
             accessToken,
