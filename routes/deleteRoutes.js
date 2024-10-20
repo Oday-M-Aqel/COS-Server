@@ -4,9 +4,9 @@ const verifyAdmin = require('../middleware/verifyAdminToken');
 const { verifyToken } = require('../middleware/verifyToken');
 const Delete = require('../controller/eventController');
 
-router.delete('/doctors/:id', verifyAdmin, Delete.deleteDoctorById);
-router.delete('/patient/:id', verifyToken, Delete.deletePatientById);
-router.delete('/appointment/:id', verifyAdmin, Delete.deleteAppointmentById);
-router.delete('/contact/:id', verifyAdmin, Delete.deleteContactById);
+router.delete('/doctors/:id', Delete.deleteDoctorById);
+router.delete('/patient/:id', Delete.deletePatientById);
+router.delete('/appointment/:id', Delete.deleteAppointmentById);
+router.delete('/contact/:id', Delete.deleteContactById);
 
 module.exports = router;
