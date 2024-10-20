@@ -8,7 +8,7 @@ const { addContact } = require("../controller/ContactingController");
 
 router.post("/admin", verifyAdmin, createDoctor);
 router.post("/addContact", addContact);
-router.post("/addAppointment", add.addAppointment);
+router.post("/addAppointment", verifyToken, add.addAppointment);
 router.post("/addMedication", verifyAdmin, add.addMedication);
 
 module.exports = router;

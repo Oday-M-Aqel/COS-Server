@@ -16,7 +16,7 @@ const verifyToken = (req, res, next) => {
 
         req.userId = decoded.id;
         
-        if (decoded.roles === "admin" || decoded.roles === "patient" || decoded.roles === "doctor") {
+        if (decoded.role === "admin" || decoded.role === "patient" || decoded.role === "doctor") {
             next();
         } else {
             return res.status(403).json({ message: 'You do not have the necessary permissions.' });
