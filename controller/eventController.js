@@ -403,7 +403,8 @@ module.exports.countDoctor = async (req, res) => {
 
 module.exports.countAppointments = async (req, res) => {
   try {
-    const appointmentCount = await Appointment.countDocuments();
+    const doctor_id = req.params.doctor_id;
+    const appointmentCount = await Appointment.countDocuments({doctor_id: doctor_id});
     if (appointmentCount === 0) {
       return res.status(404).json({ message: "No data Found" });
     }
@@ -427,7 +428,8 @@ module.exports.countPatients = async (req, res) => {
 
 module.exports.countMedications = async (req, res) => {
   try {
-    const medicationCount = await Medication.countDocuments();
+    const doctor_id = req.params.doctor_id;
+    const medicationCount = await Medication.countDocuments({doctor_id: doctor_id});
     if (medicationCount === 0) {
       return res.status(404).json({ message: "No data Found" });
     }

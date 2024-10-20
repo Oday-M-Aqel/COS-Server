@@ -6,6 +6,6 @@ route.get("/countDoctor", count.countDoctor);
 route.get("/countPatient", count.countPatients);
 route.get("/countAppointment", count.countAppointments);
 route.get("/countAppForDoctor/:doctor_id", count.countAppForDoctors);
-route.get("/countMedication", count.countMedications);
+route.get("/countMedication/:doctor_id", count.countMedications);
 
 module.exports = route;
