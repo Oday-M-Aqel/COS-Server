@@ -15,7 +15,8 @@ const verifyToken = (req, res, next) => {
         }
 
         req.userId = decoded.id;
-        
+
+        // Corrected condition with logical OR
         if (decoded.role === "admin" || decoded.role === "patient" || decoded.role === "doctor") {
             next();
         } else {
