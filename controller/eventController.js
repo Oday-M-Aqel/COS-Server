@@ -350,11 +350,10 @@ module.exports.getContacts = async (req, res) => {
 
 module.exports.getMedication = async (req, res) => {
   try {
-    const { doctor_id } = req.params.doctor_id;
-
+    const doctor_id  = req.params.doctor_id;
     const foundDoctor = await Doctor.findById(doctor_id);
     if (!foundDoctor) {
-      return res.status(404).json({ message: "No data Found" });
+      return res.status(404).json({ message: "No doctor Found" });
     }
 
     const page = parseInt(req.params.page) || 1;
