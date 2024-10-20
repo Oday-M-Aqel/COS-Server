@@ -281,7 +281,7 @@ module.exports.getAppointment = async (req, res) => {
     const doctor_id = req.params.doctor_id;
     const skip = (page - 1) * limit;
     const appointments = await Appointment.find({doctor_id: doctor_id}).skip(skip).limit(limit);
-    
+
     if (appointments && appointments.length > 0) {
       return res.status(200).json(appointments);
     } else {
@@ -403,8 +403,7 @@ module.exports.countDoctor = async (req, res) => {
 
 module.exports.countAppointments = async (req, res) => {
   try {
-    const doctor_id = req.params.doctor_id;
-    const appointmentCount = await Appointment.countDocuments({doctor_id: doctor_id});
+    const appointmentCount = await Appointment.countDocuments();
     if (appointmentCount === 0) {
       return res.status(404).json({ message: "No data Found" });
     }
