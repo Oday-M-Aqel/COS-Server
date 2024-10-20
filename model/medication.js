@@ -11,6 +11,10 @@ const medication_Schema = new mongoose.Schema({
     ref: "patient",
     required: true,
   },
+  name: {
+    type: String,
+    required: true,
+  },
   cash: {
     type: Number,
     required: true,
