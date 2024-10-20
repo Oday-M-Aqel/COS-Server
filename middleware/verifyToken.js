@@ -13,7 +13,7 @@ const verifyToken = (req, res, next) => {
         if (err) {
             return res.status(401).json({ message: 'Failed to authenticate token.' });
         }
-
+        console.log(accessToken);
         req.userId = decoded.id;
 
         // Corrected condition with logical OR

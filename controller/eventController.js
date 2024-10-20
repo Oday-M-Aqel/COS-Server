@@ -281,7 +281,7 @@ module.exports.getAppointment = async (req, res) => {
     const doctor_id = req.params.doctor_id;
     const skip = (page - 1) * limit;
     const appointments = await Appointment.find({doctor_id: doctor_id}).skip(skip).limit(limit);
-
+    
     if (appointments && appointments.length > 0) {
       return res.status(200).json(appointments);
     } else {

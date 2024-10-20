@@ -78,7 +78,7 @@ module.exports.logIn = async (req, res) => {
         .status(400)
         .json({ message: "Email and password are required" });
     }
-
+    
     const isDoctor = isEmailStartsWithDr(email);
     const UserModel = isDoctor ? Doctor : Patient;
 
