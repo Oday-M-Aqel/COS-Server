@@ -1,4 +1,4 @@
-const verify = require("jsonwebtoken");
+const { verify } = require("jsonwebtoken");
 const verifyAdminToken = (req, res, next) => {
   const token = req.headers["authorization"];
 

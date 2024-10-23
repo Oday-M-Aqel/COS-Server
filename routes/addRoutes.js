@@ -6,9 +6,9 @@ const createDoctor = require("../controller/admin/addDoctor");
 const add = require("../controller/eventController");
 const { addContact } = require("../controller/ContactingController");
 
-router.post("/admin", createDoctor);
+router.post("/admin", verifyAdmin, createDoctor);
 router.post("/addContact", addContact);
-router.post("/addAppointment", add.addAppointment);
-router.post("/addMedication", add.addMedication);
+router.post("/addAppointment", verifyToken, add.addAppointment);
+router.post("/addMedication", verifyToken, add.addMedication);
 
 module.exports = router;
