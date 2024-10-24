@@ -27,7 +27,7 @@ module.exports.addAppointment = async (req, res) => {
     }
 
     const thePatient = await Patient.findById(patient_id);
-    const name = thePatient.first_Name + thePatient.last_Name;
+    const name = thePatient.first_Name + " " + thePatient.last_Name;
     const appointmentDate = new Date(date);
     const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     const appointmentDay = dayNames[appointmentDate.getDay()];
@@ -102,6 +102,7 @@ module.exports.addAppointment = async (req, res) => {
       doctor_id,
       patient_id,
       name,
+      email: thePatient.email,
       date: appointmentDate,
       time,
       details,
