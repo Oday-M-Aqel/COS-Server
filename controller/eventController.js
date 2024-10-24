@@ -415,17 +415,20 @@ module.exports.getContacts = async (req, res) => {
 
 module.exports.getMedication = async (req, res) => {
   try {
-    const doctor_id = req.params.doctor_id;
+    const { doctor_id, val } = req.params;
     const foundDoctor = await Doctor.findById(doctor_id);
+
     if (!foundDoctor) {
-      return res.status(404).json({ message: "No doctor Found" });
+      return res.status(404).json({ message: "No doctor found" });
     }
 
     const page = parseInt(req.params.page) || 1;
     const limit = parseInt(req.params.limit) || 6;
     const skip = (page - 1) * limit;
 
-    const medications = await Medication.find({ doctor_id })
+    const statusFilter = val === 'pending' ? 'pending' : val;
+
+    const medications = await Medication.find({ doctor_id, status: statusFilter })
       .populate("doctor_id", "name")
       .populate("patient_id", "name")
       .sort({ date: 1 })
@@ -435,10 +438,10 @@ module.exports.getMedication = async (req, res) => {
     if (!medications || medications.length === 0) {
       return res
         .status(404)
-        .json({ message: "No medications found for this doctor" });
+        .json({ message: `No ${val} medications found for this doctor` });
     }
 
-    const totalMedications = await Medication.countDocuments({ doctor_id });
+    const totalMedications = await Medication.countDocuments({ doctor_id, status: statusFilter });
     const totalPages = Math.ceil(totalMedications / limit);
 
     res.status(200).json({
