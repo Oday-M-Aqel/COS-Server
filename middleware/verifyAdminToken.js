@@ -15,7 +15,7 @@ const verifyAdminToken = (req, res, next) => {
 
     req.userId = decoded.id;
 
-    if (decoded.role === "admin") {
+    if (decoded.role === "admin" || decoded.role === "doctor") {
       next();
     } else {
       return res

@@ -10,5 +10,5 @@ router.post("/admin", verifyAdmin, createDoctor);
 router.post("/addContact", addContact);
 router.post("/addAppointment", verifyToken, add.addAppointment);
 router.post("/addMedication", verifyToken, add.addMedication);
-
+router.post("/addMedTDelApp", verifyAdmin, add.addMedThenDelApp);
 module.exports = router;

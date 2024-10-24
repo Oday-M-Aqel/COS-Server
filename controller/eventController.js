@@ -117,6 +117,35 @@ module.exports.addAppointment = async (req, res) => {
   }
 };
 
+module.exports.addMedThenDelApp = async (req, res) => {
+  try {
+    const { appointment_id } = req.params;
+
+    const appointment = await Appointment.findById(appointment_id);
+
+    if (!appointment) {
+      return res.status(404).json({ message: "Appointment not found" });
+    }
+    const name = appointment.patient_id.first_Name + appointment.patient_id.last_Name;
+    const newMedication = new Medication({
+      doctor_id: appointment.doctor_id,
+      patient_id: appointment.patient_id,
+      name: name,
+    });
+
+    await newMedication.save();
+
+    await Appointment.findByIdAndDelete(appointment_id);
+
+    res.status(200).json({
+      message: "Medication added and appointment deleted successfully",
+      medication: newMedication,
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Internal server error: " + err.message });
+  }
+};
+
 module.exports.addMedication = async (req, res) => {
   try {
     const { doctor_id, patient_id, cash, date, status, note, description } =
@@ -297,6 +326,36 @@ module.exports.getAppointment = async (req, res) => {
     res.status(500).json({ message: "Internal server error: " + err.message });
   }
 };
+module.exports.getPendingAppointmentsByDoctor = async (req, res) => {
+  try {
+    const { doctor_id } = req.params;
+
+    const foundDoctor = await Doctor.findById(doctor_id);
+    if (!foundDoctor) {
+      return res.status(404).json({ message: "Doctor not found" });
+    }
+
+    const pendingAppointments = await Appointment.find({
+      doctor_id,
+      status: "pending",
+    })
+      .populate("doctor_id", "name")
+      .populate("patient_id", "name");
+
+    if (!pendingAppointments || pendingAppointments.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No pending appointments found for this doctor" });
+    }
+
+    res.status(200).json({
+      message: "Pending appointments retrieved successfully",
+      data: pendingAppointments,
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
 
 module.exports.getPatients = async (req, res) => {
   try {
@@ -469,3 +528,23 @@ module.exports.countAppForDoctors = async (req, res) => {
       .json({ message: "Internal server error: " + err.message });
   }
 };
+
+module.exports.countMedForDoctors = async (req, res) => {
+  try {
+    const { doctor_id } = req.params;
+    const medicationCount = await Medication.countDocuments({ doctor_id });
+
+    if (medicationCount === 0) {
+      return res
+        .status(404)
+        .json({ message: "No medications found for this doctor" });
+    }
+
+    return res.status(200).json({ count: medicationCount });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ message: "Internal server error: " + err.message });
+  }
+};
+
