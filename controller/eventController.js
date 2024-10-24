@@ -127,7 +127,8 @@ module.exports.addMedThenDelApp = async (req, res) => {
     if (!appointment) {
       return res.status(404).json({ message: "Appointment not found" });
     }
-    const name = appointment.patient_id.first_Name + appointment.patient_id.last_Name;
+    const name =
+      appointment.patient_id.first_Name + appointment.patient_id.last_Name;
     const newMedication = new Medication({
       doctor_id: appointment.doctor_id,
       patient_id: appointment.patient_id,
@@ -270,7 +271,14 @@ module.exports.updatePatientById = async (req, res) => {
 
 module.exports.updateMedication = async (req, res) => {
   try {
-    const { id, data } = req.body;
+    const { id, cash, date, note, description } = req.body;
+    const date1 = new Date(date);
+    const data = {
+      cash,
+      date1,
+      note,
+      description,
+    };
     const updatedMedication = await Medication.findByIdAndUpdate(id, data, {
       new: true,
     });
@@ -329,19 +337,25 @@ module.exports.getAppointment = async (req, res) => {
 };
 module.exports.getPendingAppointmentsByDoctor = async (req, res) => {
   try {
-    const { doctor_id } = req.params;
+    const { doctor_id, page = 1, limit = 6 } = req.params;
 
     const foundDoctor = await Doctor.findById(doctor_id);
     if (!foundDoctor) {
       return res.status(404).json({ message: "Doctor not found" });
     }
 
+    const pageNumber = parseInt(page) || 1;
+    const limitNumber = parseInt(limit) || 6;
+    const skip = (pageNumber - 1) * limitNumber;
+
     const pendingAppointments = await Appointment.find({
       doctor_id,
       status: "pending",
     })
       .populate("doctor_id", "name")
-      .populate("patient_id", "name");
+      .populate("patient_id", "name")
+      .skip(skip)
+      .limit(limitNumber);
 
     if (!pendingAppointments || pendingAppointments.length === 0) {
       return res
@@ -349,14 +363,26 @@ module.exports.getPendingAppointmentsByDoctor = async (req, res) => {
         .json({ message: "No pending appointments found for this doctor" });
     }
 
+    const totalPendingAppointments = await Appointment.countDocuments({
+      doctor_id,
+      status: "pending",
+    });
+    const totalPages = Math.ceil(totalPendingAppointments / limitNumber);
+
     res.status(200).json({
       message: "Pending appointments retrieved successfully",
       data: pendingAppointments,
+      pagination: {
+        totalRecords: totalPendingAppointments,
+        totalPages: totalPages,
+        currentPage: pageNumber,
+      },
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
+
 
 module.exports.getPatients = async (req, res) => {
   try {
@@ -416,8 +442,8 @@ module.exports.getContacts = async (req, res) => {
 module.exports.getMedication = async (req, res) => {
   try {
     const { doctor_id, val } = req.params;
-    const foundDoctor = await Doctor.findById(doctor_id);
 
+    const foundDoctor = await Doctor.findById(doctor_id);
     if (!foundDoctor) {
       return res.status(404).json({ message: "No doctor found" });
     }
@@ -426,9 +452,14 @@ module.exports.getMedication = async (req, res) => {
     const limit = parseInt(req.params.limit) || 6;
     const skip = (page - 1) * limit;
 
-    const statusFilter = val === 'pending' ? 'pending' : val;
+    const query = { doctor_id };
 
-    const medications = await Medication.find({ doctor_id, status: statusFilter })
+    if (val && val !== "empty") {
+      query.status = val;
+    }
+
+
+    const medications = await Medication.find(query)
       .populate("doctor_id", "name")
       .populate("patient_id", "name")
       .sort({ date: 1 })
@@ -436,12 +467,14 @@ module.exports.getMedication = async (req, res) => {
       .limit(limit);
 
     if (!medications || medications.length === 0) {
-      return res
-        .status(404)
-        .json({ message: `No ${val} medications found for this doctor` });
+      return res.status(404).json({
+        message: `No medications found for this doctor${
+          val && val !== "empty" ? ` with status ${val}` : ""
+        }`,
+      });
     }
 
-    const totalMedications = await Medication.countDocuments({ doctor_id, status: statusFilter });
+    const totalMedications = await Medication.countDocuments(query);
     const totalPages = Math.ceil(totalMedications / limit);
 
     res.status(200).json({
@@ -457,6 +490,7 @@ module.exports.getMedication = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
 
 // Count Functions:
 
@@ -516,6 +550,52 @@ module.exports.countMedications = async (req, res) => {
   }
 };
 
+module.exports.countPendingMedications = async (req, res) => {
+  try {
+    const { doctor_id, val } = req.params;
+
+    const page = parseInt(req.params.page) || 1;
+    const limit = parseInt(req.params.limit) || 6;
+    const skip = (page - 1) * limit;
+
+    // Build the query condition based on the value of `val`
+    const query = { doctor_id: doctor_id };
+    if (val === "pending") {
+      query.status = "pending"; // Add status condition if val is "pending"
+    }
+
+    // Count total medications based on the query
+    const totalMedications = await Medication.countDocuments(query);
+
+    if (totalMedications === 0) {
+      return res.status(404).json({ message: "No medications found" });
+    }
+
+    // Find medications with pagination based on the query
+    const medications = await Medication.find(query)
+      .skip(skip)
+      .limit(limit);
+
+    const totalPages = Math.ceil(totalMedications / limit);
+
+    return res.status(200).json({
+      message: "Medications retrieved successfully",
+      data: medications,
+      pagination: {
+        totalRecords: totalMedications,
+        totalPages: totalPages,
+        currentPage: page,
+      },
+    });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ message: "Internal server error: " + err.message });
+  }
+};
+
+
+
 module.exports.countAppForDoctors = async (req, res) => {
   try {
     const { doctor_id } = req.params;
@@ -551,4 +631,3 @@ module.exports.countMedForDoctors = async (req, res) => {
       .json({ message: "Internal server error: " + err.message });
   }
 };
-

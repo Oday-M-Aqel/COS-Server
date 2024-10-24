@@ -13,11 +13,10 @@ route.get("/patientRecords/:page/:limit", verifyAdmin, Get.getPatients);
 route.get("/search", Get.searchDoctor);
 route.get("/contacts/:page/:limit", verifyAdmin, Get.getContacts);
 route.get(
-  "/medications/:doctor_id/:val/:page/:limit",
-  verifyAdmin,
+  "/medications/:doctor_id/:page/:limit/:val",
   Get.getMedication
 );
-route.get("/pendingApp/:doctor_id", verifyAdmin, Get.getPendingAppointmentsByDoctor);
+route.get("/pendingApp/:page/:limit/:doctor_id", verifyAdmin, Get.getPendingAppointmentsByDoctor);
 
 
 module.exports = route;
