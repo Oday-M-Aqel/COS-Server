@@ -127,12 +127,10 @@ module.exports.addMedThenDelApp = async (req, res) => {
     if (!appointment) {
       return res.status(404).json({ message: "Appointment not found" });
     }
-    const name =
-      appointment.patient_id.first_Name + appointment.patient_id.last_Name;
     const newMedication = new Medication({
       doctor_id: appointment.doctor_id,
       patient_id: appointment.patient_id,
-      name: name,
+      name: appointment.name,
     });
 
     await newMedication.save();
@@ -335,54 +333,6 @@ module.exports.getAppointment = async (req, res) => {
     res.status(500).json({ message: "Internal server error: " + err.message });
   }
 };
-module.exports.getPendingAppointmentsByDoctor = async (req, res) => {
-  try {
-    const { doctor_id, page = 1, limit = 6 } = req.params;
-
-    const foundDoctor = await Doctor.findById(doctor_id);
-    if (!foundDoctor) {
-      return res.status(404).json({ message: "Doctor not found" });
-    }
-
-    const pageNumber = parseInt(page) || 1;
-    const limitNumber = parseInt(limit) || 6;
-    const skip = (pageNumber - 1) * limitNumber;
-
-    const pendingAppointments = await Appointment.find({
-      doctor_id,
-      status: "pending",
-    })
-      .populate("doctor_id", "name")
-      .populate("patient_id", "name")
-      .skip(skip)
-      .limit(limitNumber);
-
-    if (!pendingAppointments || pendingAppointments.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "No pending appointments found for this doctor" });
-    }
-
-    const totalPendingAppointments = await Appointment.countDocuments({
-      doctor_id,
-      status: "pending",
-    });
-    const totalPages = Math.ceil(totalPendingAppointments / limitNumber);
-
-    res.status(200).json({
-      message: "Pending appointments retrieved successfully",
-      data: pendingAppointments,
-      pagination: {
-        totalRecords: totalPendingAppointments,
-        totalPages: totalPages,
-        currentPage: pageNumber,
-      },
-    });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
-
 
 module.exports.getPatients = async (req, res) => {
   try {
