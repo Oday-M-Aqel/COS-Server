@@ -6,6 +6,6 @@ const update = require("../controller/eventController");
 
 router.put("/doctor", verifyAdmin, update.updateDoctorById);
 router.put("/patient", verifyToken, update.updatePatientById);
-router.put("/medication", verifyAdmin, update.updateMedication);
+router.put("/medication", update.updateMedication);
 
 module.exports = router;

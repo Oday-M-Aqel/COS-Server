@@ -270,16 +270,32 @@ module.exports.updatePatientById = async (req, res) => {
 module.exports.updateMedication = async (req, res) => {
   try {
     const { id, cash, date, note, description } = req.body;
-    const date1 = new Date(date);
+
+    console.log(req.body);
+
     const data = {
       cash,
-      date1,
-      note,
-      description,
+      date,
+      description: description || undefined,
     };
-    const updatedMedication = await Medication.findByIdAndUpdate(id, data, {
+
+    Object.keys(data).forEach(
+      (key) => data[key] === undefined && delete data[key]
+    );
+
+    // If there is a note, use $push to add it to the existing array
+    const updateOperation = note
+      ? { ...data, $push: { note: note } }
+      : data;
+
+    const updatedMedication = await Medication.findByIdAndUpdate(id, updateOperation, {
       new: true,
     });
+
+    if (!updatedMedication) {
+      return res.status(404).json({ message: "Medication not found" });
+    }
+
     res.status(200).json({
       message: "Data updated successfully",
       result: updatedMedication,
