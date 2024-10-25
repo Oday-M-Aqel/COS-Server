@@ -424,8 +424,6 @@ module.exports.getMedication = async (req, res) => {
 
     const formattedMedications = medications.map(med => ({
       ...med._doc,
-      patientName: `${med.patient_id.first_Name} ${med.patient_id.last_Name}`,
-      patientEmail: med.patient_id.email,
     }));
 
     const totalMedications = await Medication.countDocuments(query);
