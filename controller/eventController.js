@@ -403,15 +403,13 @@ module.exports.getMedication = async (req, res) => {
     const skip = (page - 1) * limit;
 
     const query = { doctor_id };
-
     if (val && val !== "empty") {
       query.status = val;
     }
 
-
     const medications = await Medication.find(query)
       .populate("doctor_id", "name")
-      .populate("patient_id", "name")
+      .populate("patient_id", "first_Name last_Name email")
       .sort({ date: 1 })
       .skip(skip)
       .limit(limit);
@@ -424,12 +422,18 @@ module.exports.getMedication = async (req, res) => {
       });
     }
 
+    const formattedMedications = medications.map(med => ({
+      ...med._doc,
+      patientName: `${med.patient_id.first_Name} ${med.patient_id.last_Name}`,
+      patientEmail: med.patient_id.email,
+    }));
+
     const totalMedications = await Medication.countDocuments(query);
     const totalPages = Math.ceil(totalMedications / limit);
 
     res.status(200).json({
       message: "Medications retrieved successfully",
-      data: medications,
+      data: formattedMedications,
       pagination: {
         totalRecords: totalMedications,
         totalPages: totalPages,
@@ -440,6 +444,8 @@ module.exports.getMedication = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+
 
 
 // Count Functions:
