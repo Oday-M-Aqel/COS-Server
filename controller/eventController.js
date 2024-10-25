@@ -409,7 +409,7 @@ module.exports.getMedication = async (req, res) => {
 
     const medications = await Medication.find(query)
       .populate("doctor_id", "name")
-      .populate("patient_id", "first_Name last_Name email")
+      .populate("patient_id")
       .sort({ date: 1 })
       .skip(skip)
       .limit(limit);
@@ -422,7 +422,7 @@ module.exports.getMedication = async (req, res) => {
       });
     }
 
-    const formattedMedications = medications.map(med => ({
+    const formattedMedications = medications.map((med) => ({
       ...med._doc,
     }));
 
@@ -442,9 +442,6 @@ module.exports.getMedication = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
-
-
-
 
 // Count Functions:
 
@@ -526,9 +523,7 @@ module.exports.countPendingMedications = async (req, res) => {
     }
 
     // Find medications with pagination based on the query
-    const medications = await Medication.find(query)
-      .skip(skip)
-      .limit(limit);
+    const medications = await Medication.find(query).skip(skip).limit(limit);
 
     const totalPages = Math.ceil(totalMedications / limit);
 
@@ -547,8 +542,6 @@ module.exports.countPendingMedications = async (req, res) => {
       .json({ message: "Internal server error: " + err.message });
   }
 };
-
-
 
 module.exports.countAppForDoctors = async (req, res) => {
   try {
