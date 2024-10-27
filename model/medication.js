@@ -15,18 +15,20 @@ const medication_Schema = new mongoose.Schema({
     type: Array,
     required: true,
   },
+  email: {
+    type: String,
+    required: true,
+  },
   cash: {
     type: Number,
-    required: true,
   },
   date: {
     type: Date,
-    required: true,
   },
   status: {
     type: String,
-    enum: ['pending', 'approved', 'dispensed', 'in_progress', 'completed', 'canceled', 'expired'],
-    required: true,
+    enum: ['pending','in_progress', 'completed', 'canceled'],
+    default: "pending",
   },
   note: {
     type: Array,

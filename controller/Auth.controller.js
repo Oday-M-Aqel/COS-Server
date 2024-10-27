@@ -18,18 +18,6 @@ module.exports.signUp = async (req, res) => {
       password,
       chronic_diseases,
     } = req.body;
-    console.log({
-      first_Name,
-      last_Name,
-      birthdate,
-      patient_id,
-      gender,
-      insurance,
-      email,
-      phone,
-      password,
-      chronic_diseases,
-    })
     const userFound = await Patient.findOne({ email });
     if (userFound) {
       return res.status(404).json({ message: "Email is already in use" });

@@ -1,4 +1,4 @@
-const verify = require("jsonwebtoken");
+const { verify } = require("jsonwebtoken");
 const verifyAdminToken = (req, res, next) => {
   const token = req.headers["authorization"];
 
@@ -15,7 +15,7 @@ const verifyAdminToken = (req, res, next) => {
 
     req.userId = decoded.id;
 
-    if (decoded.role === "admin") {
+    if (decoded.role === "admin" || decoded.role === "doctor") {
       next();
     } else {
       return res

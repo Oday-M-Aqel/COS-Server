@@ -15,9 +15,18 @@ const appointment_Schema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  email: {
+    type: String,
+  },
   date: {
     type: Date,
     required: true,
+  },
+  status: {
+    type: String,
+    required: true,
+    enum: ['pending','medicated'],
+    default: "pending",
   },
   time: {
     type: String,

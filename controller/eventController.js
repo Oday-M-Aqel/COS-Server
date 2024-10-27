@@ -27,7 +27,7 @@ module.exports.addAppointment = async (req, res) => {
     }
 
     const thePatient = await Patient.findById(patient_id);
-    const name = thePatient.first_Name + thePatient.last_Name;
+    const name = thePatient.first_Name + " " + thePatient.last_Name;
     const appointmentDate = new Date(date);
     const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     const appointmentDay = dayNames[appointmentDate.getDay()];
@@ -102,6 +102,7 @@ module.exports.addAppointment = async (req, res) => {
       doctor_id,
       patient_id,
       name,
+      email: thePatient.email,
       date: appointmentDate,
       time,
       details,
@@ -114,6 +115,34 @@ module.exports.addAppointment = async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
+  }
+};
+
+module.exports.addMedThenDelApp = async (req, res) => {
+  try {
+    const { appointment_id } = req.params;
+
+    const appointment = await Appointment.findById(appointment_id);
+
+    if (!appointment) {
+      return res.status(404).json({ message: "Appointment not found" });
+    }
+    const newMedication = new Medication({
+      doctor_id: appointment.doctor_id,
+      patient_id: appointment.patient_id,
+      name: appointment.name,
+    });
+
+    await newMedication.save();
+
+    await Appointment.findByIdAndDelete(appointment_id);
+
+    res.status(200).json({
+      message: "Medication added and appointment deleted successfully",
+      medication: newMedication,
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Internal server error: " + err.message });
   }
 };
 
@@ -244,10 +273,33 @@ module.exports.updatePatientById = async (req, res) => {
 
 module.exports.updateMedication = async (req, res) => {
   try {
-    const { id, data } = req.body;
-    const updatedMedication = await Medication.findByIdAndUpdate(id, data, {
+    const { id, cash, date, note, description } = req.body;
+
+    console.log(req.body);
+
+    const data = {
+      cash,
+      date,
+      description: description || undefined,
+    };
+
+    Object.keys(data).forEach(
+      (key) => data[key] === undefined && delete data[key]
+    );
+
+    // If there is a note, use $push to add it to the existing array
+    const updateOperation = note
+      ? { ...data, $push: { note: note } }
+      : data;
+
+    const updatedMedication = await Medication.findByIdAndUpdate(id, updateOperation, {
       new: true,
     });
+
+    if (!updatedMedication) {
+      return res.status(404).json({ message: "Medication not found" });
+    }
+
     res.status(200).json({
       message: "Data updated successfully",
       result: updatedMedication,
@@ -359,17 +411,23 @@ module.exports.getContacts = async (req, res) => {
 
 module.exports.getMedication = async (req, res) => {
   try {
-    const doctor_id = req.params.doctor_id;
+    const { doctor_id, val } = req.params;
+
     const foundDoctor = await Doctor.findById(doctor_id);
     if (!foundDoctor) {
-      return res.status(404).json({ message: "No doctor Found" });
+      return res.status(404).json({ message: "No doctor found" });
     }
 
     const page = parseInt(req.params.page) || 1;
     const limit = parseInt(req.params.limit) || 6;
     const skip = (page - 1) * limit;
 
-    const medications = await Medication.find({ doctor_id })
+    const query = { doctor_id };
+    if (val && val !== "empty") {
+      query.status = val;
+    }
+
+    const medications = await Medication.find(query)
       .populate("doctor_id", "name")
       .populate("patient_id", "name")
       .sort({ date: 1 })
@@ -377,17 +435,23 @@ module.exports.getMedication = async (req, res) => {
       .limit(limit);
 
     if (!medications || medications.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "No medications found for this doctor" });
+      return res.status(404).json({
+        message: `No medications found for this doctor${
+          val && val !== "empty" ? ` with status ${val}` : ""
+        }`,
+      });
     }
 
-    const totalMedications = await Medication.countDocuments({ doctor_id });
+    const formattedMedications = medications.map((med) => ({
+      ...med._doc,
+    }));
+
+    const totalMedications = await Medication.countDocuments(query);
     const totalPages = Math.ceil(totalMedications / limit);
 
     res.status(200).json({
       message: "Medications retrieved successfully",
-      data: medications,
+      data: formattedMedications,
       pagination: {
         totalRecords: totalMedications,
         totalPages: totalPages,
@@ -457,6 +521,48 @@ module.exports.countMedications = async (req, res) => {
   }
 };
 
+module.exports.countPendingMedications = async (req, res) => {
+  try {
+    const { doctor_id, val } = req.params;
+
+    const page = parseInt(req.params.page) || 1;
+    const limit = parseInt(req.params.limit) || 6;
+    const skip = (page - 1) * limit;
+
+    // Build the query condition based on the value of `val`
+    const query = { doctor_id: doctor_id };
+    if (val === "pending") {
+      query.status = "pending"; // Add status condition if val is "pending"
+    }
+
+    // Count total medications based on the query
+    const totalMedications = await Medication.countDocuments(query);
+
+    if (totalMedications === 0) {
+      return res.status(404).json({ message: "No medications found" });
+    }
+
+    // Find medications with pagination based on the query
+    const medications = await Medication.find(query).skip(skip).limit(limit);
+
+    const totalPages = Math.ceil(totalMedications / limit);
+
+    return res.status(200).json({
+      message: "Medications retrieved successfully",
+      data: medications,
+      pagination: {
+        totalRecords: totalMedications,
+        totalPages: totalPages,
+        currentPage: page,
+      },
+    });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ message: "Internal server error: " + err.message });
+  }
+};
+
 module.exports.countAppForDoctors = async (req, res) => {
   try {
     const { doctor_id } = req.params;
@@ -478,12 +584,14 @@ module.exports.countMedForDoctors = async (req, res) => {
   try {
     const { doctor_id } = req.params;
     const medicationCount = await Medication.countDocuments({ doctor_id });
+
     if (medicationCount === 0) {
       return res
         .status(404)
-        .json({ message: "No appointments found for this doctor" });
+        .json({ message: "No medications found for this doctor" });
     }
-    return res.status(200).json({ count: appointmentCount });
+
+    return res.status(200).json({ count: medicationCount });
   } catch (err) {
     return res
       .status(500)
