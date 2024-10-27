@@ -105,13 +105,14 @@ module.exports.logIn = async (req, res) => {
       process.env.JWT_REFRESH_SECRET,
       { expiresIn: "1d" }
     );
+
     res.cookie("cosToken", refreshToken, {
       httpOnly: true,
       secure: true,
       sameSite: "None",
       maxAge: 24 * 60 * 60 * 1000,
     });
-
+    console.log(req.cookie);
     res.status(200).json({
       message: "Login successful",
       accessToken,

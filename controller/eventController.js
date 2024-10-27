@@ -122,12 +122,16 @@ module.exports.addMedication = async (req, res) => {
     const { doctor_id, patient_id, cash, date, status, note, description } =
       req.body;
     const thePatient = await Patient.findById(patient_id);
-    const name = thePatient.first_Name + thePatient.last_Name;
+    const userData = {
+      fullName: thePatient.first_Name + " " + thePatient.last_Name,
+      email: thePatient.email,
+      phone: thePatient.phone,
+    };
 
     const newMedication = new Medication({
       doctor_id,
       patient_id,
-      name,
+      userData,
       cash,
       date,
       status,
@@ -458,6 +462,23 @@ module.exports.countAppForDoctors = async (req, res) => {
     const { doctor_id } = req.params;
     const appointmentCount = await Appointment.countDocuments({ doctor_id });
     if (appointmentCount === 0) {
+      return res
+        .status(404)
+        .json({ message: "No appointments found for this doctor" });
+    }
+    return res.status(200).json({ count: appointmentCount });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ message: "Internal server error: " + err.message });
+  }
+};
+
+module.exports.countMedForDoctors = async (req, res) => {
+  try {
+    const { doctor_id } = req.params;
+    const medicationCount = await Medication.countDocuments({ doctor_id });
+    if (medicationCount === 0) {
       return res
         .status(404)
         .json({ message: "No appointments found for this doctor" });
