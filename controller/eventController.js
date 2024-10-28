@@ -118,6 +118,27 @@ module.exports.addAppointment = async (req, res) => {
   }
 };
 
+module.exports.addVisit = async (req, res) => {
+  try {
+    const { medicationId, visitData } = req.body;
+
+    const medication = await Medication.findById(medicationId);
+    if (!medication) {
+      return res.status(404).json({ message: "Medication record not found" });
+    }
+
+    medication.visits.push(visitData);
+    await medication.save();
+
+    res.status(200).json({
+      message: "Visit added successfully",
+      result: medication,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports.addMedThenDelApp = async (req, res) => {
   try {
     const { appointment_id } = req.params;
@@ -210,6 +231,31 @@ module.exports.deleteAppointmentById = async (req, res) => {
   }
 };
 
+module.exports.deleteVisit = async (req, res) => {
+  try {
+    const { medicationId, visitId } = req.body;
+
+    // Use $pull to remove the specific visit by its _id within the visits array
+    const updatedMedication = await Medication.findByIdAndUpdate(
+      medicationId,
+      { $pull: { visits: { _id: visitId } } },
+      { new: true }
+    );
+
+    if (!updatedMedication) {
+      return res.status(404).json({ message: "Medication record not found" });
+    }
+
+    res.status(200).json({
+      message: "Visit deleted successfully",
+      result: updatedMedication,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
 module.exports.deleteContactById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -248,6 +294,34 @@ module.exports.updateDoctorById = async (req, res) => {
       res.status(500).json({ message: err.message });
     }
   });
+};
+
+module.exports.updateVisit = async (req, res) => {
+  try {
+    const { medicationId, visitId, updatedData } = req.body;
+
+    const medication = await Medication.findById(medicationId);
+    if (!medication) {
+      return res.status(404).json({ message: "Medication record not found" });
+    }
+
+    const visit = medication.visits.find(
+      (visit) => visit.id.toString() === visitId
+    );
+    if (!visit) {
+      return res.status(404).json({ message: "Visit not found" });
+    }
+
+    Object.assign(visit, updatedData);
+    await medication.save();
+
+    res.status(200).json({
+      message: "Visit updated successfully",
+      result: medication,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
 module.exports.updatePatientById = async (req, res) => {
