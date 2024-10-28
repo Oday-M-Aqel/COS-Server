@@ -19,22 +19,22 @@ const medication_Schema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  cash: {
-    type: Number,
-  },
-  date: {
-    type: Date,
-  },
   status: {
     type: String,
     enum: ['pending','in_progress', 'completed', 'canceled'],
     default: "pending",
   },
+  cash: {
+    type: Array,
+  },
+  date: {
+    type: Array,
+  },
   note: {
     type: Array,
   },
   description: {
-    type: String,
+    type: Array,
   },
 });
 

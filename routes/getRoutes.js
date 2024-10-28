@@ -16,6 +16,7 @@ route.get(
   "/medications/:doctor_id/:page/:limit/:val",
   Get.getMedication
 );
+route.get("/searchData", Get.CitiesAndSpecializations);
 
 
 module.exports = route;

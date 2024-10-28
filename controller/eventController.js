@@ -277,24 +277,35 @@ module.exports.updateMedication = async (req, res) => {
 
     console.log(req.body);
 
-    const data = {
-      cash,
-      date,
-      description: description || undefined,
-    };
+    const updateOperation = {};
 
-    Object.keys(data).forEach(
-      (key) => data[key] === undefined && delete data[key]
+    // If there is a cash value, push it to the cash array
+    if (cash) {
+      updateOperation.$push = { ...updateOperation.$push, cash: cash };
+    }
+
+    // If there is a date value, push it to the date array
+    if (date) {
+      updateOperation.$push = { ...updateOperation.$push, date: date };
+    }
+
+    // If there is a description value, push it to the description array
+    if (description) {
+      updateOperation.$push = { ...updateOperation.$push, description: description };
+    }
+
+    // If there is a note value, push it to the note array
+    if (note) {
+      updateOperation.$push = { ...updateOperation.$push, note: note };
+    }
+
+    const updatedMedication = await Medication.findByIdAndUpdate(
+      id,
+      updateOperation,
+      {
+        new: true,
+      }
     );
-
-    // If there is a note, use $push to add it to the existing array
-    const updateOperation = note
-      ? { ...data, $push: { note: note } }
-      : data;
-
-    const updatedMedication = await Medication.findByIdAndUpdate(id, updateOperation, {
-      new: true,
-    });
 
     if (!updatedMedication) {
       return res.status(404).json({ message: "Medication not found" });
@@ -308,6 +319,7 @@ module.exports.updateMedication = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
 
 /*
 Get Data:
@@ -390,6 +402,40 @@ module.exports.searchDoctor = async (req, res) => {
     res.status(500).json({ message: "Internal server error" + err.message });
   }
 };
+
+module.exports.CitiesAndSpecializations = async (req, res) => {
+  try {
+    // Use aggregation to retrieve distinct city and specialization pairs
+    const data = await Doctor.aggregate([
+      {
+        $group: {
+          _id: null,
+          cities: { $addToSet: "$city" },
+          specializations: { $addToSet: "$specialization" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          cities: 1,
+          specializations: 1,
+        },
+      },
+    ]);
+
+    if (!data.length) {
+      return res.status(404).json({ message: "No data found" });
+    }
+
+    const { cities, specializations } = data[0];
+
+    res.status(200).json({ cities, specializations });
+  } catch (err) {
+    res.status(500).json({ message: "Internal server error: " + err.message });
+  }
+};
+
+
 
 module.exports.getContacts = async (req, res) => {
   try {
