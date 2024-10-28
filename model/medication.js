@@ -25,7 +25,7 @@ const medication_Schema = new mongoose.Schema({
     default: "pending",
   },
   cash: {
-    type: Array,
+    type: Number,
   },
   date: {
     type: Array,

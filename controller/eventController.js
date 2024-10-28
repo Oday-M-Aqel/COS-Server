@@ -279,22 +279,18 @@ module.exports.updateMedication = async (req, res) => {
 
     const updateOperation = {};
 
-    // If there is a cash value, push it to the cash array
-    if (cash) {
-      updateOperation.$push = { ...updateOperation.$push, cash: cash };
+    if (cash !== undefined) {
+      updateOperation.cash = cash;
     }
 
-    // If there is a date value, push it to the date array
     if (date) {
       updateOperation.$push = { ...updateOperation.$push, date: date };
     }
 
-    // If there is a description value, push it to the description array
     if (description) {
       updateOperation.$push = { ...updateOperation.$push, description: description };
     }
 
-    // If there is a note value, push it to the note array
     if (note) {
       updateOperation.$push = { ...updateOperation.$push, note: note };
     }
@@ -319,6 +315,7 @@ module.exports.updateMedication = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
 
 
 /*
