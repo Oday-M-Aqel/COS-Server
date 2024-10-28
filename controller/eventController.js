@@ -152,6 +152,7 @@ module.exports.addMedThenDelApp = async (req, res) => {
       doctor_id: appointment.doctor_id,
       patient_id: appointment.patient_id,
       name: appointment.name,
+      status: "in_progress"
     });
 
     await newMedication.save();
@@ -255,7 +256,6 @@ module.exports.deleteVisit = async (req, res) => {
   }
 };
 
-
 module.exports.deleteContactById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -347,7 +347,7 @@ module.exports.updatePatientById = async (req, res) => {
 
 module.exports.updateMedication = async (req, res) => {
   try {
-    const { id, cash, date, note, description } = req.body;
+    const { id, cash, status, date, note, description } = req.body;
 
     console.log(req.body);
 
@@ -357,12 +357,19 @@ module.exports.updateMedication = async (req, res) => {
       updateOperation.cash = cash;
     }
 
+    if (status !== undefined) {
+      updateOperation.status = status;
+    }
+
     if (date) {
       updateOperation.$push = { ...updateOperation.$push, date: date };
     }
 
     if (description) {
-      updateOperation.$push = { ...updateOperation.$push, description: description };
+      updateOperation.$push = {
+        ...updateOperation.$push,
+        description: description,
+      };
     }
 
     if (note) {
@@ -389,8 +396,6 @@ module.exports.updateMedication = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
-
-
 
 /*
 Get Data:
@@ -505,8 +510,6 @@ module.exports.CitiesAndSpecializations = async (req, res) => {
     res.status(500).json({ message: "Internal server error: " + err.message });
   }
 };
-
-
 
 module.exports.getContacts = async (req, res) => {
   try {
