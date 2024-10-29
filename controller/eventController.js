@@ -236,7 +236,6 @@ module.exports.deleteVisit = async (req, res) => {
   try {
     const { medicationId, visitId } = req.body;
 
-    // Use $pull to remove the specific visit by its _id within the visits array
     const updatedMedication = await Medication.findByIdAndUpdate(
       medicationId,
       { $pull: { visits: { _id: visitId } } },
@@ -463,25 +462,27 @@ module.exports.getPatients = async (req, res) => {
 module.exports.searchDoctor = async (req, res) => {
   try {
     const { city, specialty } = req.body;
-    console.log(req.body);
-    const found = await Doctor.findOne({
-      city: city,
-      specialization: specialty,
-    });
 
-    if (!found) {
-      return res.status(404).json({ message: "No data Found" });
+    const query = {};
+    if (city) query.city = city;
+    if (specialty) query.specialization = specialty;
+
+    const found = await Doctor.find(query);
+
+    if (!found || found.length === 0) {
+      return res.status(404).json({ message: "No data found" });
     }
+
     res.status(200).json(found);
   } catch (err) {
     console.log(err.message);
-    res.status(500).json({ message: "Internal server error" + err.message });
+    res.status(500).json({ message: "Internal server error: " + err.message });
   }
 };
 
+
 module.exports.CitiesAndSpecializations = async (req, res) => {
   try {
-    // Use aggregation to retrieve distinct city and specialization pairs
     const data = await Doctor.aggregate([
       {
         $group: {
@@ -649,20 +650,17 @@ module.exports.countPendingMedications = async (req, res) => {
     const limit = parseInt(req.params.limit) || 6;
     const skip = (page - 1) * limit;
 
-    // Build the query condition based on the value of `val`
     const query = { doctor_id: doctor_id };
     if (val === "pending") {
-      query.status = "pending"; // Add status condition if val is "pending"
+      query.status = "pending";
     }
 
-    // Count total medications based on the query
     const totalMedications = await Medication.countDocuments(query);
 
     if (totalMedications === 0) {
       return res.status(404).json({ message: "No medications found" });
     }
 
-    // Find medications with pagination based on the query
     const medications = await Medication.find(query).skip(skip).limit(limit);
 
     const totalPages = Math.ceil(totalMedications / limit);
