@@ -10,7 +10,7 @@ route.get(
   Get.getAppointment
 );
 route.get("/patientRecords/:page/:limit", verifyAdmin, Get.getPatients);
-route.get("/search", Get.searchDoctor);
+route.post("/search", Get.searchDoctor);
 route.get("/contacts/:page/:limit", verifyAdmin, Get.getContacts);
 route.get(
   "/medications/:doctor_id/:page/:limit/:val",

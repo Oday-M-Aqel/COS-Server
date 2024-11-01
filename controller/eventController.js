@@ -462,12 +462,16 @@ module.exports.getPatients = async (req, res) => {
 module.exports.searchDoctor = async (req, res) => {
   try {
     const { city, specialty } = req.body;
-
+    console.log(req.body);
     const query = {};
     if (city) query.city = city;
     if (specialty) query.specialization = specialty;
 
+    
+
+
     const found = await Doctor.find(query);
+    console.log(found);
 
     if (!found || found.length === 0) {
       return res.status(404).json({ message: "No data found" });
