@@ -467,10 +467,12 @@ module.exports.searchDoctor = async (req, res) => {
     if (city) query.city = city;
     if (specialty) query.specialization = specialty;
 
-    
-
-
     const found = await Doctor.find(query);
+    
+    if(found.role === "admin") {
+      return res.status(404).json({message: "No data found"});
+    }
+
     console.log(found);
 
     if (!found || found.length === 0) {
