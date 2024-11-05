@@ -129,7 +129,7 @@ module.exports.addVisit = async (req, res) => {
     const visitData = {
       id: id,
       cash: cash,
-      date: date,
+      date: new Date(date),
       note: note,
       description: description,
     };
