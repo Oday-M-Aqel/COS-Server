@@ -120,13 +120,19 @@ module.exports.addAppointment = async (req, res) => {
 
 module.exports.addVisit = async (req, res) => {
   try {
-    const { medicationId, visitData } = req.body;
+    const { medicationId, id, cash, date, note, description } = req.body;
 
     const medication = await Medication.findById(medicationId);
     if (!medication) {
       return res.status(404).json({ message: "Medication record not found" });
     }
-
+    const visitData = {
+      id: id,
+      cash: cash,
+      date: date,
+      note: note,
+      description: description,
+    };
     medication.visits.push(visitData);
     await medication.save();
 
@@ -152,7 +158,7 @@ module.exports.addMedThenDelApp = async (req, res) => {
       doctor_id: appointment.doctor_id,
       patient_id: appointment.patient_id,
       name: appointment.name,
-      status: "in_progress"
+      status: "in_progress",
     });
 
     await newMedication.save();
@@ -468,9 +474,9 @@ module.exports.searchDoctor = async (req, res) => {
     if (specialty) query.specialization = specialty;
 
     const found = await Doctor.find(query);
-    
-    if(found.role === "admin") {
-      return res.status(404).json({message: "No data found"});
+
+    if (found.role === "admin") {
+      return res.status(404).json({ message: "No data found" });
     }
 
     console.log(found);
@@ -485,7 +491,6 @@ module.exports.searchDoctor = async (req, res) => {
     res.status(500).json({ message: "Internal server error: " + err.message });
   }
 };
-
 
 module.exports.CitiesAndSpecializations = async (req, res) => {
   try {
