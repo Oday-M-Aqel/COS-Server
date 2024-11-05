@@ -120,19 +120,21 @@ module.exports.addAppointment = async (req, res) => {
 
 module.exports.addVisit = async (req, res) => {
   try {
-    const { medicationId, id, cash, date, note, description } = req.body;
+    const { medicationId, cash, date, note, description } = req.body;
     console.log(req.body);
     const medication = await Medication.findById(medicationId);
     if (!medication) {
       return res.status(404).json({ message: "Medication record not found" });
     }
+    
+    console.log(medication);
     const visitData = {
-      id: id,
       cash: cash,
       date: new Date(date),
       note: note,
       description: description,
     };
+    console.log(visitData);
     medication.visits.push(visitData);
     await medication.save();
 

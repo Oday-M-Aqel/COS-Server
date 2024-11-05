@@ -26,7 +26,6 @@ const medication_Schema = new mongoose.Schema({
   },
   visits: [
     {
-      id: mongoose.Schema.Types.ObjectId,
       cash: Number,
       date: Date,
       note: String,
