@@ -240,7 +240,7 @@ module.exports.deleteAppointmentById = async (req, res) => {
 
 module.exports.deleteVisit = async (req, res) => {
   try {
-    const { medicationId, visitId } = req.body;
+    const { medicationId, visitId } = req.params;
 
     const updatedMedication = await Medication.findByIdAndUpdate(
       medicationId,
