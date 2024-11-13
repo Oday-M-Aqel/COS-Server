@@ -12,11 +12,9 @@ route.get(
 route.get("/patientRecords/:page/:limit", verifyAdmin, Get.getPatients);
 route.post("/search", Get.searchDoctor);
 route.get("/contacts/:page/:limit", verifyAdmin, Get.getContacts);
-route.get(
-  "/medications/:doctor_id/:page/:limit/:val",
-  Get.getMedication
-);
+route.get("/medications/:doctor_id/:page/:limit/:val", Get.getMedication);
 route.get("/searchData", Get.CitiesAndSpecializations);
-
+route.get("/patient/:patient_id/appointments", Get.getPatientAppointment);
+route.get("/patient/:patient_id/medications", Get.getPatientMedications);
 
 module.exports = route;
