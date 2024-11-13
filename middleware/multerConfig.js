@@ -5,7 +5,7 @@ const { existsSync, mkdirSync } = require('fs')
 
 const ensureDirExists = (dir) => {
     if (!existsSync(dir)) {
-        mkdirSync(dir, { recursive: true });
+        
     }
 };
 
