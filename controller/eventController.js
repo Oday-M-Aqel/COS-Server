@@ -804,13 +804,11 @@ module.exports.getPatientMedications = async (req, res) => {
   }
 };
 
-
-
 module.exports.deletePatientAppointments = async (req, res) => {
   try {
-    const { appointment_id } = req.params;
+    const { patient_id } = req.params;
 
-    const result = await Appointment.findByIdAndDelete({ "_id": appointment_id });
+    const result = await Appointment.deleteMany({ patient_id });
 
     if (result.deletedCount === 0) {
       return res
@@ -820,7 +818,6 @@ module.exports.deletePatientAppointments = async (req, res) => {
 
     res.status(200).json({
       message: "Appointments deleted successfully",
-      deletedCount: result.deletedCount,
     });
   } catch (err) {
     res.status(500).json({ message: "Internal Server Error: " + err.message });
