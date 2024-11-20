@@ -11,8 +11,12 @@ const medication_Schema = new mongoose.Schema({
     ref: "patient",
     required: true,
   },
-  userData: {
-    type: Array,
+  name: {
+    type: String,
+    required: true,
+  },
+  phone: {
+    type: String,
     required: true,
   },
   email: {

@@ -5,6 +5,7 @@ const Contacting = require("../model/contacting");
 const Appointment = require("../model/appointment");
 const Medication = require("../model/medication");
 const { uploadUserAvatar } = require("../middleware/multerConfig");
+const patient = require("../model/patient");
 
 /*
     Insert Data
@@ -152,14 +153,29 @@ module.exports.addMedThenDelApp = async (req, res) => {
     const { appointment_id } = req.params;
 
     const appointment = await Appointment.findById(appointment_id);
-
     if (!appointment) {
       return res.status(404).json({ message: "Appointment not found" });
     }
+
+    const patientData = await Patient.findById(appointment.patient_id);
+    if (!patientData) {
+      return res.status(404).json({ message: "Patient not found" });
+    }
+
+    const existingMedication = await Medication.findOne({ patient_id: appointment.patient_id });
+    if (existingMedication) {
+      await Appointment.findByIdAndDelete(appointment_id);
+      return res.status(400).json({
+        message: "You are already registered for medication. Appointment deleted.",
+      });
+    }
+
     const newMedication = new Medication({
       doctor_id: appointment.doctor_id,
       patient_id: appointment.patient_id,
-      name: appointment.name,
+      name: `${patientData.first_Name} ${patientData.last_Name}`,
+      phone: patientData.phone,
+      email: patientData.email,
       status: "in_progress",
     });
 
@@ -175,6 +191,7 @@ module.exports.addMedThenDelApp = async (req, res) => {
     res.status(500).json({ message: "Internal server error: " + err.message });
   }
 };
+
 
 module.exports.addMedication = async (req, res) => {
   try {

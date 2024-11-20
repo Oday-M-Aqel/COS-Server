@@ -11,5 +11,5 @@ router.post("/addContact", addContact);
 router.post("/addVisit", add.addVisit);
 router.post("/addAppointment", verifyToken, add.addAppointment);
 router.post("/addMedication", verifyToken, add.addMedication);
-router.post("/addMedTDelApp/:appointment_id", verifyAdmin, add.addMedThenDelApp);
+router.post("/addMedTDelApp/:appointment_id", add.addMedThenDelApp);
 module.exports = router;
