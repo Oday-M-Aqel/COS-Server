@@ -821,22 +821,30 @@ module.exports.getPatientMedications = async (req, res) => {
   }
 };
 
+const Appointment = require("../model/appointment");
+
 module.exports.deletePatientAppointments = async (req, res) => {
   try {
     const { appointment_id } = req.params;
 
-    const result = await Appointment.deleteMany({ appointment_id });
+    if (!appointment_id) {
+      return res.status(400).json({ message: "Appointment ID is required" });
+    }
 
-    if (result.deletedCount === 0) {
+    const result = await Appointment.findByIdAndDelete(appointment_id);
+
+    if (!result) {
       return res
         .status(404)
-        .json({ message: "No appointments found for this patient" });
+        .json({ message: "No appointment found with the given ID" });
     }
 
     res.status(200).json({
-      message: "Appointments deleted successfully",
+      message: "Appointment deleted successfully",
+      deletedAppointment: result,
     });
   } catch (err) {
     res.status(500).json({ message: "Internal Server Error: " + err.message });
   }
 };
+
