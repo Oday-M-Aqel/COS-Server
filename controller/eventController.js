@@ -821,8 +821,6 @@ module.exports.getPatientMedications = async (req, res) => {
   }
 };
 
-const Appointment = require("../model/appointment");
-
 module.exports.deletePatientAppointments = async (req, res) => {
   try {
     const { appointment_id } = req.params;
