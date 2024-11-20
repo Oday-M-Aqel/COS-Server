@@ -808,9 +808,9 @@ module.exports.getPatientMedications = async (req, res) => {
 
 module.exports.deletePatientAppointments = async (req, res) => {
   try {
-    const { patient_id } = req.params;
+    const { appointment_id } = req.params;
 
-    const result = await Appointment.deleteMany({ patient_id });
+    const result = await Appointment.findByIdAndDelete({ "_id": appointment_id });
 
     if (result.deletedCount === 0) {
       return res
