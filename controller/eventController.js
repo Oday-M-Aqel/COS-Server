@@ -18,7 +18,7 @@ module.exports.addAppointment = async (req, res) => {
     const FoundDoctor = await Doctor.findOne({ _id: doctor_id });
 
     if (!FoundDoctor) {
-      return res.status(404).json({ message: "No data Found" });
+      return res.status(200).json({ message: "No data Found" });
     }
 
     if (!FoundDoctor.DaysWork || !Array.isArray(FoundDoctor.DaysWork)) {
@@ -125,7 +125,7 @@ module.exports.addVisit = async (req, res) => {
 
     const medication = await Medication.findById(medicationId);
     if (!medication) {
-      return res.status(404).json({ message: "Medication record not found" });
+      return res.status(200).json({ message: "Medication record not found!" });
     }
 
     const visitData = {
@@ -157,12 +157,12 @@ module.exports.addMedThenDelApp = async (req, res) => {
 
     const appointment = await Appointment.findById(appointment_id);
     if (!appointment) {
-      return res.status(404).json({ message: "Appointment not found" });
+      return res.status(200).json({ message: "Appointment not found" });
     }
 
     const patientData = await Patient.findById(appointment.patient_id);
     if (!patientData) {
-      return res.status(404).json({ message: "Patient not found" });
+      return res.status(200).json({ message: "Patient not found" });
     }
 
     const existingMedication = await Medication.findOne({ patient_id: appointment.patient_id });
@@ -283,7 +283,7 @@ module.exports.deleteVisit = async (req, res) => {
     );
 
     if (!updatedMedication) {
-      return res.status(404).json({ message: "Medication record not found" });
+      return res.status(200).json({ message: "Medication record not found" });
     }
 
     res.status(200).json({
@@ -341,14 +341,14 @@ module.exports.updateVisit = async (req, res) => {
 
     const medication = await Medication.findById(medicationId);
     if (!medication) {
-      return res.status(404).json({ message: "Medication record not found" });
+      return res.status(200).json({ message: "Medication record not found" });
     }
 
     const visit = medication.visits.find(
       (visit) => visit.id.toString() === visitId
     );
     if (!visit) {
-      return res.status(404).json({ message: "Visit not found" });
+      return res.status(200).json({ message: "Visit not found" });
     }
 
     Object.assign(visit, updatedData);
@@ -373,7 +373,7 @@ module.exports.updatePatientById = async (req, res) => {
     });
 
     if (!updatedPatient) {
-      return res.status(404).json({ message: "No data Found" });
+      return res.status(200).json({ message: "No data Found" });
     }
 
     res
@@ -424,7 +424,7 @@ module.exports.updateMedication = async (req, res) => {
     );
 
     if (!updatedMedication) {
-      return res.status(404).json({ message: "Medication not found" });
+      return res.status(200).json({ message: "Medication not found" });
     }
 
     res.status(200).json({
@@ -452,7 +452,7 @@ module.exports.getDoctors = async (req, res) => {
     if (doctors && doctors.length > 0) {
       return res.status(200).json(doctors);
     } else {
-      return res.status(404).json({ message: "No data Found" });
+      return res.status(200).json({ message: "No data Found" });
     }
   } catch (err) {
     console.log(err.message);
@@ -473,7 +473,7 @@ module.exports.getAppointment = async (req, res) => {
     if (appointments && appointments.length > 0) {
       return res.status(200).json(appointments);
     } else {
-      return res.status(404).json({ message: "No data Found" });
+      return res.status(200).json({ message: "No data Found" });
     }
   } catch (err) {
     console.log(err.message);
@@ -491,7 +491,7 @@ module.exports.getPatients = async (req, res) => {
     if (patients && patients.length > 0) {
       return res.status(200).json(patients);
     } else {
-      return res.status(404).json({ message: "No data Found" });
+      return res.status(200).json({ message: "No data Found" });
     }
   } catch (err) {
     console.log(err.message);
@@ -510,13 +510,13 @@ module.exports.searchDoctor = async (req, res) => {
     const found = await Doctor.find(query);
 
     if (found.role === "admin") {
-      return res.status(404).json({ message: "No data found" });
+      return res.status(200).json({ message: "No data found" });
     }
 
     console.log(found);
 
     if (!found || found.length === 0) {
-      return res.status(404).json({ message: "No data found" });
+      return res.status(200).json({ message: "No data found" });
     }
 
     res.status(200).json(found);
@@ -546,7 +546,7 @@ module.exports.CitiesAndSpecializations = async (req, res) => {
     ]);
 
     if (!data.length) {
-      return res.status(404).json({ message: "No data found" });
+      return res.status(200).json({ message: "No data found" });
     }
 
     const { cities, specializations } = data[0];
@@ -567,7 +567,7 @@ module.exports.getContacts = async (req, res) => {
     if (contacts && contacts.length > 0) {
       return res.status(200).json(contacts);
     } else {
-      return res.status(404).json({ message: "No data Found" });
+      return res.status(200).json({ message: "No data Found" });
     }
   } catch (err) {
     console.log(err.message);
@@ -581,7 +581,7 @@ module.exports.getMedication = async (req, res) => {
 
     const foundDoctor = await Doctor.findById(doctor_id);
     if (!foundDoctor) {
-      return res.status(404).json({ message: "No doctor found" });
+      return res.status(200).json({ message: "No doctor found" });
     }
 
     const page = parseInt(req.params.page) || 1;
@@ -601,7 +601,7 @@ module.exports.getMedication = async (req, res) => {
       .limit(limit);
 
     if (!medications || medications.length === 0) {
-      return res.status(404).json({
+      return res.status(200).json({
         message: `No medications found for this doctor${
           val && val !== "empty" ? ` with status ${val}` : ""
         }`,
@@ -646,7 +646,7 @@ module.exports.countAppointments = async (req, res) => {
   try {
     const appointmentCount = await Appointment.countDocuments();
     if (appointmentCount === 0) {
-      return res.status(404).json({ message: "No data Found" });
+      return res.status(200).json({ message: "No data Found" });
     }
     return res.status(200).json({ count: appointmentCount });
   } catch (err) {
@@ -660,7 +660,7 @@ module.exports.countPatients = async (req, res) => {
   try {
     const patientCount = await Patient.countDocuments();
     if (patientCount === 0) {
-      return res.status(404).json({ message: "No data Found" });
+      return res.status(200).json({ message: "No data Found" });
     }
     return res.status(200).json({ count: patientCount });
   } catch (err) {
@@ -677,7 +677,7 @@ module.exports.countMedications = async (req, res) => {
       doctor_id: doctor_id,
     });
     if (medicationCount === 0) {
-      return res.status(404).json({ message: "No data Found" });
+      return res.status(200).json({ message: "No data Found" });
     }
     return res.status(200).json({ count: medicationCount });
   } catch (err) {
@@ -703,7 +703,7 @@ module.exports.countPendingMedications = async (req, res) => {
     const totalMedications = await Medication.countDocuments(query);
 
     if (totalMedications === 0) {
-      return res.status(404).json({ message: "No medications found" });
+      return res.status(200).json({ message: "No medications found" });
     }
 
     const medications = await Medication.find(query).skip(skip).limit(limit);
@@ -732,7 +732,7 @@ module.exports.countAppForDoctors = async (req, res) => {
     const appointmentCount = await Appointment.countDocuments({ doctor_id });
     if (appointmentCount === 0) {
       return res
-        .status(404)
+        .status(200)
         .json({ message: "No appointments found for this doctor" });
     }
     return res.status(200).json({ count: appointmentCount });
@@ -750,7 +750,7 @@ module.exports.countMedForDoctors = async (req, res) => {
 
     if (medicationCount === 0) {
       return res
-        .status(404)
+        .status(200)
         .json({ message: "No medications found for this doctor" });
     }
 
@@ -778,7 +778,7 @@ module.exports.getPatientAppointment = async (req, res) => {
 
     if (!appointments || appointments.length === 0) {
       return res
-        .status(404)
+        .status(200)
         .json({ message: "No appointments found for this patient" });
     }
 
@@ -815,7 +815,7 @@ module.exports.getPatientMedications = async (req, res) => {
 
     if (!medications || medications.length === 0) {
       return res
-        .status(404)
+        .status(200)
         .json({ message: "No medications found for this patient" });
     }
 
@@ -848,7 +848,7 @@ module.exports.deletePatientAppointments = async (req, res) => {
 
     if (!result) {
       return res
-        .status(404)
+        .status(200)
         .json({ message: "No appointment found with the given ID" });
     }
 
