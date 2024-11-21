@@ -122,31 +122,34 @@ module.exports.addAppointment = async (req, res) => {
 module.exports.addVisit = async (req, res) => {
   try {
     const { medicationId, cash, date, note, description } = req.body;
-    console.log(req.body);
+
     const medication = await Medication.findById(medicationId);
     if (!medication) {
       return res.status(404).json({ message: "Medication record not found" });
     }
 
-    console.log(medication);
     const visitData = {
       cash: cash,
       date: new Date(date),
       note: note,
       description: description,
     };
-    console.log(visitData);
+
     medication.visits.push(visitData);
+
+    medication.status = "completed";
+
     await medication.save();
 
     res.status(200).json({
-      message: "Visit added successfully",
+      message: "Visit added successfully and medication status updated to completed",
       result: medication,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Internal server error: " + error.message });
   }
 };
+
 
 module.exports.addMedThenDelApp = async (req, res) => {
   try {
@@ -163,11 +166,24 @@ module.exports.addMedThenDelApp = async (req, res) => {
     }
 
     const existingMedication = await Medication.findOne({ patient_id: appointment.patient_id });
+
     if (existingMedication) {
-      await Appointment.findByIdAndDelete(appointment_id);
-      return res.status(400).json({
-        message: "You are already registered for medication. Appointment deleted.",
-      });
+      if (existingMedication.status === "completed") {
+        existingMedication.status = "in_progress";
+        await existingMedication.save();
+
+        await Appointment.findByIdAndDelete(appointment_id);
+
+        return res.status(200).json({
+          message: "Medication status updated to in_progress, and appointment deleted.",
+          medication: existingMedication,
+        });
+      } else {
+        await Appointment.findByIdAndDelete(appointment_id);
+        return res.status(400).json({
+          message: "You are already registered for medication. Appointment deleted.",
+        });
+      }
     }
 
     const newMedication = new Medication({
@@ -191,7 +207,6 @@ module.exports.addMedThenDelApp = async (req, res) => {
     res.status(500).json({ message: "Internal server error: " + err.message });
   }
 };
-
 
 module.exports.addMedication = async (req, res) => {
   try {
