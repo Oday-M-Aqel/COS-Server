@@ -142,14 +142,16 @@ module.exports.addVisit = async (req, res) => {
     await medication.save();
 
     res.status(200).json({
-      message: "Visit added successfully and medication status updated to completed",
+      message:
+        "Visit added successfully and medication status updated to completed",
       result: medication,
     });
   } catch (error) {
-    res.status(500).json({ message: "Internal server error: " + error.message });
+    res
+      .status(500)
+      .json({ message: "Internal server error: " + error.message });
   }
 };
-
 
 module.exports.addMedThenDelApp = async (req, res) => {
   try {
@@ -165,7 +167,10 @@ module.exports.addMedThenDelApp = async (req, res) => {
       return res.status(404).json({ message: "Patient not found" });
     }
 
-    const existingMedication = await Medication.findOne({ patient_id: appointment.patient_id });
+    const existingMedication = await Medication.findOne({
+      patient_id: appointment.patient_id,
+      doctor_id: appointment.doctor_id,
+    });
 
     if (existingMedication) {
       if (existingMedication.status === "completed") {
@@ -175,13 +180,15 @@ module.exports.addMedThenDelApp = async (req, res) => {
         await Appointment.findByIdAndDelete(appointment_id);
 
         return res.status(200).json({
-          message: "Medication status updated to in_progress, and appointment deleted.",
+          message:
+            "Medication status updated to in_progress, and appointment deleted.",
           medication: existingMedication,
         });
       } else {
         await Appointment.findByIdAndDelete(appointment_id);
         return res.status(400).json({
-          message: "You are already registered for medication. Appointment deleted.",
+          message:
+            "You are already registered for medication. Appointment deleted.",
         });
       }
     }
@@ -606,7 +613,7 @@ module.exports.getMedication = async (req, res) => {
           val && val !== "empty" ? ` with status ${val}` : ""
         }`,
         data: [],
-    });
+      });
     }
 
     const formattedMedications = medications.map((med) => ({
@@ -861,4 +868,3 @@ module.exports.deletePatientAppointments = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error: " + err.message });
   }
 };
-
