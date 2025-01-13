@@ -37,6 +37,10 @@ const patient_Schema = new mongoose.Schema({
     minlength: 10,
     validate: [isNumeric, "phone number must contain just numbers..."],
   },
+  banned: {
+    type: Number,
+    default: 0,
+  },
   password: {
     type: String,
     minlength: 8,

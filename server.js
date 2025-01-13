@@ -7,6 +7,7 @@ const authRoutes = require("./routes/authRoutes");
 const addRoutes = require("./routes/addRoutes");
 const deleteRoutes = require("./routes/deleteRoutes");
 const updateRoutes = require("./routes/updateRoutes");
+const adminRoutes = require("./routes/adminRoutes");
 const getRoutes = require("./routes/getRoutes");
 const countRoutes = require("./routes/countRoutes");
 const path = require("path");
@@ -16,7 +17,7 @@ const app = express();
 app.use(cookieParser());
 
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || `https://ameerbadran.github.io/test-deploy/`,
+  origin: `http://localhost:5173`,
   methods: "GET,PUT,POST,DELETE",
   credentials: true,
   optionsSuccessStatus: 204,
@@ -41,6 +42,7 @@ mongoose
 
 
 app.use("/auth", authRoutes);
+app.use("/admin", adminRoutes);
 app.use("/add", addRoutes);
 app.use("/delete", deleteRoutes);
 app.use("/update", updateRoutes);
@@ -53,3 +55,21 @@ app.use(
 );
 
 app.get("/", (req, res) => res.send("Hello World!"));
+
+
+
+/*
+update doctor
+update patient
+
+get doctor byId: name, address
+get patient byId
+
+convert user(Patient) to admin
+
+delete doctor
+delete patient
+
+view all records
+view all appointments
+*/

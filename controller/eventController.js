@@ -868,3 +868,11 @@ module.exports.deletePatientAppointments = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error: " + err.message });
   }
 };
+
+module.exports.upgradePatientToAdmin = async (req, res) => {
+  try {
+    
+  } catch (err) {
+    res.status(500).json({message: "Internal Server Error" + err.message});
+  }
+}
