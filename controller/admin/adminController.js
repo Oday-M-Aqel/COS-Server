@@ -97,7 +97,7 @@ module.exports.deletePatientById = async (req, res) => {
 module.exports.updatePatientRole = async (req, res) => {
   try {
     const { patientId } = req.params;
-    const { role } = req.body; // Accept the role (e.g., "admin" or "patient") from the request body
+    const { role } = req.body;
 
     if (!["admin", "patient"].includes(role)) {
       return res.status(400).json({ message: "Invalid role value" });

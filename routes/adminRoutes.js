@@ -70,7 +70,7 @@ router.put(
 );
 
 router.patch(
-  "/increase-banned",
+  "/increase-banned/:patientId",
   verifyAdmin,
   adminController.increaseBannedPatient
 );
