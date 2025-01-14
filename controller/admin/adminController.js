@@ -196,7 +196,7 @@ module.exports.getPatientById = async (req, res) => {
       "first_Name last_Name insurance phone chronic_diseases"
     );
 
-    if (patient > 0) {
+    if (patient) {
       return res.status(200).json(patient);
     } else {
       return res.status(200).json({ message: "No patients found!" });
