@@ -9,12 +9,12 @@ router.post("/add-doctor", verifyAdmin, addDoctor);
 
 router.put(
   "/update-doctor/:doctorId",
-  verifyAdmin,
+  verifyToken,
   adminController.updateDoctorById
 );
 router.put(
   "/update-patient/:patientId",
-  verifyAdmin,
+  verifyToken,
   adminController.updatePatientById
 );
 

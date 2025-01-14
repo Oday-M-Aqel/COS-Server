@@ -28,8 +28,7 @@ module.exports.getPatients = async (req, res) => {
 
     const patients = await Patient.find()
       .skip(skip)
-      .limit(limit)
-      .select("first_Name last_Name insurance phone chronic_diseases");
+      .limit(limit);
 
     if (patients.length > 0) {
       return res.status(200).json(patients);
