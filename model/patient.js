@@ -71,13 +71,13 @@ patient_Schema.pre("save", async function (next) {
     }
   }
 
-    if (this.isNew) {
-      const currentUTC = new Date(this.createdAt || Date.now()); 
-      currentUTC.setHours(currentUTC.getHours() + 3);            
-      this.createdAt = currentUTC;                               
-    }
+  if (this.isNew) {
+    const currentUTC = new Date(this.createdAt || Date.now());
+    currentUTC.setHours(currentUTC.getHours() + 3);
+    this.createdAt = currentUTC;
+  }
 
-    next();
+  next();
 });
 
 module.exports = patient = mongoose.model("patient", patient_Schema);

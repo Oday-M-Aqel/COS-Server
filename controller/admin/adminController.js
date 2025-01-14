@@ -26,9 +26,7 @@ module.exports.getPatients = async (req, res) => {
     const limit = parseInt(req.params.limit) || 6;
     const skip = (page - 1) * limit;
 
-    const patients = await Patient.find()
-      .skip(skip)
-      .limit(limit);
+    const patients = await Patient.find().skip(skip).limit(limit);
 
     if (patients.length > 0) {
       return res.status(200).json(patients);
@@ -96,17 +94,27 @@ module.exports.deletePatientById = async (req, res) => {
   }
 };
 
-module.exports.upgradePatientToAdmin = async (req, res) => {
+module.exports.updatePatientRole = async (req, res) => {
   try {
-    const patient = await Patient.findById(req.params.patientId);
-    if (!patient) return res.status(404).json({ message: "Patient not found" });
+    const { patientId } = req.params;
+    const { role } = req.body; // Accept the role (e.g., "admin" or "patient") from the request body
 
-    patient.role = "admin";
+    if (!["admin", "patient"].includes(role)) {
+      return res.status(400).json({ message: "Invalid role value" });
+    }
+
+    const patient = await Patient.findById(patientId);
+    if (!patient) {
+      return res.status(404).json({ message: "Patient not found" });
+    }
+
+    patient.role = role;
     await patient.save();
 
-    res
-      .status(200)
-      .json({ message: "Patient upgraded to admin successfully", patient });
+    res.status(200).json({
+      message: `Patient role updated to ${role} successfully`,
+      patient,
+    });
   } catch (err) {
     res.status(500).json({ message: "Internal Server Error: " + err.message });
   }

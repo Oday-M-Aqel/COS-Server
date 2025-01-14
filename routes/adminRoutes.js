@@ -18,11 +18,7 @@ router.put(
   adminController.updatePatientById
 );
 
-router.get(
-  "/get-doctor/:doctorId",
-  verifyToken,
-  adminController.getDoctorById
-);
+router.get("/get-doctor/:doctorId", verifyToken, adminController.getDoctorById);
 router.get(
   "/get-patient/:patientId",
   verifyToken,
@@ -68,9 +64,15 @@ router.patch(
 );
 
 router.put(
-  "/upgrade-patient/:patientId",
+  "/change-patient/:patientId",
   verifyAdmin,
   adminController.upgradePatientToAdmin
+);
+
+router.patch(
+  "/increase-banned",
+  verifyAdmin,
+  adminController.increaseBannedPatient
 );
 
 module.exports = router;
