@@ -176,11 +176,11 @@ module.exports.increaseBannedPatient = async (req, res) => {
 
 module.exports.getDoctorById = async (req, res) => {
   try {
-    const doctorId = parseInt(req.params.doctorId);
-    const doctors = await Doctor.findById({ doctorId });
+    const { doctorId } = req.params;
+    const doctor = await Doctor.findById(doctorId);
 
-    if (doctors && doctors.length > 0) {
-      return res.status(200).json(doctors);
+    if (doctor) {
+      return res.status(200).json(doctor);
     } else {
       return res.status(200).json({ message: "No doctor found!" });
     }
@@ -191,13 +191,13 @@ module.exports.getDoctorById = async (req, res) => {
 
 module.exports.getPatientById = async (req, res) => {
   try {
-    const patientId = parseInt(req.params.patientId);
-    const patients = await Patient.findById({ patientId }).select(
+    const { patientId } = req.params;
+    const patient = await Patient.findById(patientId).select(
       "first_Name last_Name insurance phone chronic_diseases"
     );
 
-    if (patients.length > 0) {
-      return res.status(200).json(patients);
+    if (patient > 0) {
+      return res.status(200).json(patient);
     } else {
       return res.status(200).json({ message: "No patients found!" });
     }
