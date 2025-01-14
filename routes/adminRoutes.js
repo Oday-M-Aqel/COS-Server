@@ -59,7 +59,6 @@ router.delete(
 
 router.patch(
   "/increase-banned/:patientId",
-  verifyAdmin,
   adminController.increaseBannedPatient
 );
 
@@ -69,10 +68,5 @@ router.put(
   adminController.updatePatientRole
 );
 
-router.patch(
-  "/increase-banned/:patientId",
-  verifyAdmin,
-  adminController.increaseBannedPatient
-);
 
 module.exports = router;
