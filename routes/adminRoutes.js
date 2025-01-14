@@ -57,7 +57,7 @@ router.delete(
   adminController.deletePatientById
 );
 
-router.patch(
+router.put(
   "/increase-banned/:patientId",
   adminController.increaseBannedPatient
 );
