@@ -66,7 +66,7 @@ router.patch(
 router.put(
   "/change-patient/:patientId",
   verifyAdmin,
-  adminController.upgradePatientToAdmin
+  adminController.updatePatientRole
 );
 
 router.patch(
