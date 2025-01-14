@@ -55,21 +55,3 @@ app.use(
 );
 
 app.get("/", (req, res) => res.send("Hello World!"));
-
-
-
-/*
-update doctor
-update patient
-
-get doctor byId: name, address
-get patient byId
-
-convert user(Patient) to admin
-
-delete doctor
-delete patient
-
-view all records
-view all appointments
-*/

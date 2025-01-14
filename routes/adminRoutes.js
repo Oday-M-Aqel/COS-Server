@@ -20,12 +20,12 @@ router.put(
 router.get(
   "/get-doctor/:doctorId",
   verifyAdmin,
-  adminController.findDoctorById
+  adminController.getDoctorById
 );
 router.get(
   "/get-patient/:patientId",
   verifyAdmin,
-  adminController.findPatientById
+  adminController.getPatientById
 );
 
 router.get(
