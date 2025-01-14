@@ -3,6 +3,7 @@ const verifyAdmin = require("../middleware/verifyAdminToken");
 const router = express.Router();
 const adminController = require("../controller/admin/adminController");
 const addDoctor = require("../controller/admin/addDoctor");
+const { verifyToken } = require("../middleware/verifyToken");
 
 router.post("/add-doctor", verifyAdmin, addDoctor);
 
@@ -19,12 +20,12 @@ router.put(
 
 router.get(
   "/get-doctor/:doctorId",
-  verifyAdmin,
+  verifyToken,
   adminController.getDoctorById
 );
 router.get(
   "/get-patient/:patientId",
-  verifyAdmin,
+  verifyToken,
   adminController.getPatientById
 );
 
