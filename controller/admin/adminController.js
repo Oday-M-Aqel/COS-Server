@@ -173,3 +173,35 @@ module.exports.increaseBannedPatient = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error: " + err.message });
   }
 };
+
+module.exports.getDoctorById = async (req, res) => {
+  try {
+    const doctorId = parseInt(req.params.doctorId);
+    const doctors = await Doctor.findById({ doctorId });
+
+    if (doctors && doctors.length > 0) {
+      return res.status(200).json(doctors);
+    } else {
+      return res.status(200).json({ message: "No doctor found!" });
+    }
+  } catch (err) {
+    res.status(500).json({ message: "Internal Server Error" + err.message });
+  }
+};
+
+module.exports.getPatientById = async (req, res) => {
+  try {
+    const patientId = parseInt(req.params.patientId);
+    const patients = await Patient.findById({ patientId }).select(
+      "first_Name last_Name insurance phone chronic_diseases"
+    );
+
+    if (patients.length > 0) {
+      return res.status(200).json(patients);
+    } else {
+      return res.status(200).json({ message: "No patients found!" });
+    }
+  } catch (err) {
+    res.status(500).json({ message: "Internal Server Error: " + err.message });
+  }
+};

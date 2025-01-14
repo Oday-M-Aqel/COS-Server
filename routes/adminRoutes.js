@@ -6,19 +6,70 @@ const addDoctor = require("../controller/admin/addDoctor");
 
 router.post("/add-doctor", verifyAdmin, addDoctor);
 
-router.put("/update-doctor/:doctorId", verifyAdmin, adminController.updateDoctorById);
-router.put("/update-patient/:patientId", verifyAdmin, adminController.updatePatientById);
+router.put(
+  "/update-doctor/:doctorId",
+  verifyAdmin,
+  adminController.updateDoctorById
+);
+router.put(
+  "/update-patient/:patientId",
+  verifyAdmin,
+  adminController.updatePatientById
+);
 
-router.get("/get-doctors/:page/:limit", verifyAdmin, adminController.getDoctors);
-router.get("/get-patients/:page/:limit", verifyAdmin, adminController.getPatients);
-router.get("/get-appointments/:page/:limit", verifyAdmin, adminController.getAppointment);
-router.get("/get-medications/:page/:limit", verifyAdmin, adminController.getMedication);
+router.get(
+  "/get-doctor/:doctorId",
+  verifyAdmin,
+  adminController.findDoctorById
+);
+router.get(
+  "/get-patient/:patientId",
+  verifyAdmin,
+  adminController.findPatientById
+);
 
-router.delete("/delete-doctor/:doctorId", verifyAdmin, adminController.deleteDoctorById);
-router.delete("/delete-patient/:patientId", verifyAdmin, adminController.deletePatientById);
+router.get(
+  "/get-doctors/:page/:limit",
+  verifyAdmin,
+  adminController.getDoctors
+);
+router.get(
+  "/get-patients/:page/:limit",
+  verifyAdmin,
+  adminController.getPatients
+);
+router.get(
+  "/get-appointments/:page/:limit",
+  verifyAdmin,
+  adminController.getAppointment
+);
+router.get(
+  "/get-medications/:page/:limit",
+  verifyAdmin,
+  adminController.getMedication
+);
 
-router.patch("/increase-banned/:patientId", verifyAdmin, adminController.increaseBannedPatient);
+router.delete(
+  "/delete-doctor/:doctorId",
+  verifyAdmin,
+  adminController.deleteDoctorById
+);
+router.delete(
+  "/delete-patient/:patientId",
+  verifyAdmin,
+  adminController.deletePatientById
+);
 
-router.put("/upgrade-patient/:patientId", verifyAdmin, adminController.upgradePatientToAdmin);
+router.patch(
+  "/increase-banned/:patientId",
+  verifyAdmin,
+  adminController.increaseBannedPatient
+);
+
+router.put(
+  "/upgrade-patient/:patientId",
+  verifyAdmin,
+  adminController.upgradePatientToAdmin
+);
 
 module.exports = router;
