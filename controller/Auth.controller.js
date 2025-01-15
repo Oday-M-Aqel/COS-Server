@@ -3,7 +3,7 @@ const { sign, verify } = require("jsonwebtoken");
 const Patient = require("../model/patient");
 const Doctor = require("../model/doctor");
 const bcrypt = require("bcrypt");
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 module.exports.signUp = async (req, res) => {
   try {
     const {
@@ -23,7 +23,7 @@ module.exports.signUp = async (req, res) => {
       return res.status(404).json({ message: "Email is already in use" });
     }
 
-    const dateOfBirth = birthdate.split('T')[0];
+    const dateOfBirth = birthdate.split("T")[0];
 
     const newPatient = new Patient({
       first_Name,
@@ -38,20 +38,20 @@ module.exports.signUp = async (req, res) => {
       chronic_diseases,
     });
 
-    await newPatient.save()
+    await newPatient
+      .save()
       .then(() => {
         res.status(200).json({ message: "Patient saved successfully" });
       })
       .catch((error) => {
-        console.error('Error saving patient:', error);
+        console.error("Error saving patient:", error);
         res.status(500).json({ message: "Error saving patient" });
       });
   } catch (error) {
-    console.error('Error during signup:', error);
+    console.error("Error during signup:", error);
     res.status(500).json({ message: error.message });
   }
 };
-
 
 function isEmailStartsWithDr(email) {
   const regex = /^dr\./i;
@@ -66,20 +66,32 @@ module.exports.logIn = async (req, res) => {
         .status(400)
         .json({ message: "Email and password are required" });
     }
-    
+
     const isDoctor = isEmailStartsWithDr(email);
     const UserModel = isDoctor ? Doctor : Patient;
 
     const foundUser = await UserModel.findOne({ email });
 
     if (!foundUser) {
-      return res.status(200).json({ message: "Invalid email or password", success: false });
+      return res
+        .status(200)
+        .json({ message: "Invalid email or password", success: false });
     }
 
     const isPasswordValid = await bcrypt.compare(password, foundUser.password);
 
     if (!isPasswordValid) {
-      return res.status(200).json({ message: "Invalid email or password", success: false});
+      return res
+        .status(200)
+        .json({ message: "Invalid email or password", success: false });
+    }
+
+    if (foundUser.banned >= 3 && UserModel === Patient) {
+      return res.status(200).json({
+        message:
+          "you have been baned, Contact with administrator for more details.",
+        success: false,
+      });
     }
 
     const accessToken = jwt.sign(
@@ -106,7 +118,7 @@ module.exports.logIn = async (req, res) => {
       accessToken,
       userData: foundUser,
       userRole: foundUser.role,
-      success: true
+      success: true,
     });
   } catch (error) {
     console.error("Error during login:", error);
@@ -118,28 +130,32 @@ module.exports.refresh = async (req, res) => {
   try {
     const refreshToken = req.cookies.cosToken;
     if (refreshToken) {
-      verify(refreshToken, process.env.JWT_REFRESH_SECRET, async (err, decoded) => {
-        if (err) {
-          return res.status(406).json({ message: "Unauthorized" });
-        } else {
-          const accessToken = sign(
-            { id: decoded.id, email: decoded.email, role: decoded.role },
-            process.env.JWT_ACCESS_SECRET,
-            { expiresIn: "1h" }
-          );
-          const email1 = decoded.email;
-          const isDoctor = isEmailStartsWithDr(email1);
-          const UserModel = isDoctor ? Doctor : Patient;
-      
-          const foundUser = await UserModel.findOne({ email: email1 });
-          return res.status(200).json({
-            message: "Token refreshed successfully",
-            accessToken,
-            userData: foundUser,
-            userRole: decoded.role,
-          });
+      verify(
+        refreshToken,
+        process.env.JWT_REFRESH_SECRET,
+        async (err, decoded) => {
+          if (err) {
+            return res.status(406).json({ message: "Unauthorized" });
+          } else {
+            const accessToken = sign(
+              { id: decoded.id, email: decoded.email, role: decoded.role },
+              process.env.JWT_ACCESS_SECRET,
+              { expiresIn: "1h" }
+            );
+            const email1 = decoded.email;
+            const isDoctor = isEmailStartsWithDr(email1);
+            const UserModel = isDoctor ? Doctor : Patient;
+
+            const foundUser = await UserModel.findOne({ email: email1 });
+            return res.status(200).json({
+              message: "Token refreshed successfully",
+              accessToken,
+              userData: foundUser,
+              userRole: decoded.role,
+            });
+          }
         }
-      });
+      );
     } else {
       return res.status(406).json({ message: "Unauthorized" });
     }
@@ -157,4 +173,3 @@ module.exports.logOut = (req, res) => {
   });
   res.status(200).json({ message: "Logged out successfully" });
 };
-

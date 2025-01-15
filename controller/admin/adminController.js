@@ -170,6 +170,13 @@ module.exports.increaseBannedPatient = async (req, res) => {
     const patient = await Patient.findById(req.params.patientId);
     if (!patient) return res.status(404).json({ message: "Patient not found" });
 
+    if (patient.banned >= 3) {
+      return res.status(200).json({
+        message: "This patient is already have 3 ban!!",
+        success: false,
+      });
+    }
+
     patient.banned += 1;
     await patient.save();
 
