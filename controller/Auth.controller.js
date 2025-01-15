@@ -89,7 +89,7 @@ module.exports.logIn = async (req, res) => {
     if (foundUser.banned >= 3 && UserModel === Patient) {
       return res.status(200).json({
         message:
-          "you have been baned, Contact with administrator for more details.",
+          "you have been banned, Contact with administrator for more details.",
         success: false,
       });
     }
